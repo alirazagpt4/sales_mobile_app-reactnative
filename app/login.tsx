@@ -68,7 +68,7 @@ export default function LoginScreen() {
           autoCapitalize="none"
           style={styles.input}
           // Agar outline always blue chahiye to uncomment karein neechay wali line:
-          // outlineColor="#007bff" 
+          outlineColor="#007bff" 
         />
         
         <TextInput
@@ -78,6 +78,8 @@ export default function LoginScreen() {
           mode="outlined"
           secureTextEntry
           style={styles.input}
+          // Agar outline always blue chahiye to uncomment karein neechay wali line:
+          outlineColor="#007bff"
         />
         
         <Button
