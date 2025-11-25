@@ -18,13 +18,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
 
   const login = async (newToken: string) => {
+    console.log('User logged in, token saved to storage' , newToken);
     setToken(newToken);
     await AsyncStorage.setItem('token', newToken);
+
+    console.log('Token saved to AsyncStorage', newToken);
   };
 
   const logout = async () => {
     setToken(null);
     await AsyncStorage.removeItem('token');
+    console.log('User logged out, token removed from storage');
   };
 
   return (

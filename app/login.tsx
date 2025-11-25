@@ -1,9 +1,25 @@
 import { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../context/authContext';
+import { useAuth } from '../context/authContext';
 import axios from 'axios';
-import { TextInput, Button, Provider as PaperProvider } from 'react-native-paper';
+import { 
+  TextInput, 
+  Button, 
+  Provider as PaperProvider, 
+  Text, 
+  MD3LightTheme as DefaultTheme 
+} from 'react-native-paper';
+
+// 1. Blue Theme Define kiya hai
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#007bff', // Ye wo Blue color hai (Button + Input Focus)
+    onPrimary: '#ffffff', // Button ke text ka color white
+  },
+};
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -15,7 +31,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       setLoading(true);
-      const res = await axios.post('http://localhost:3000/api/users/login', {
+      const res = await axios.post('http://192.168.0.114:3000/api/users/login', {
         email,
         password,
       });
@@ -23,11 +39,8 @@ export default function LoginScreen() {
       const data = res.data;
       console.log('Login successful:', data);
 
-      // Token store in AuthContext + AsyncStorage
       await login(data.token);
-
-      // Redirect to MainScreen
-      router.replace('/screens/MainScreen');
+      router.replace('/main');
     } catch (err: any) {
       console.log(err.response?.data || err.message);
       Alert.alert('Login Failed', err.response?.data?.message || 'Check credentials');
@@ -37,8 +50,15 @@ export default function LoginScreen() {
   };
 
   return (
-    <PaperProvider>
+    // Theme ko yahan pass kiya taake puri app par blue color apply ho
+    <PaperProvider theme={theme}>
       <View style={styles.container}>
+        
+        {/* 2. H1 Type Header Add kiya */}
+        <Text variant="displayMedium" style={styles.headerText}>
+          Login
+        </Text>
+
         <TextInput
           label="Email"
           value={email}
@@ -47,7 +67,10 @@ export default function LoginScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
           style={styles.input}
+          // Agar outline always blue chahiye to uncomment karein neechay wali line:
+          // outlineColor="#007bff" 
         />
+        
         <TextInput
           label="Password"
           value={password}
@@ -56,11 +79,13 @@ export default function LoginScreen() {
           secureTextEntry
           style={styles.input}
         />
+        
         <Button
           mode="contained"
           onPress={handleLogin}
           loading={loading}
           style={styles.button}
+          contentStyle={styles.buttonContent}
         >
           Login
         </Button>
@@ -74,11 +99,24 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#fff', // Clean look ke liye background white
+  },
+  // Header Style
+  headerText: {
+    color: '#007bff', // Same Blue color
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 40, // Thora gap inputs se
   },
   input: {
     marginBottom: 15,
+    backgroundColor: '#fff',
   },
   button: {
-    padding: 5,
+    marginTop: 10,
+    borderRadius: 5, // Thora rounded nice lagta hai
   },
+  buttonContent: {
+    paddingVertical: 6, // Button ki height thori behtar karne ke liye
+  }
 });

@@ -1,21 +1,16 @@
+// app/_layout.tsx
 import { Stack } from 'expo-router';
 import { AuthProvider } from '../context/authContext';
-// import { StatusBar } from 'expo-status-bar';
-// import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
-// import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function RootLayout() {
-
-
   return (
     <AuthProvider>
       <Stack>
-        <Stack.Screen name="screens/SplashScreen" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/LoginScreen" options={{ headerShown: false }} />
-        <Stack.Screen name="screens/MainScreen" options={{ headerShown: false }} />
+        {/* Just the file name, lowercase */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="main" options={{ headerShown: false }} />
       </Stack>
     </AuthProvider>
-    
- 
   );
 }
