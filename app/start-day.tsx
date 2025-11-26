@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/authContext';
 import axios  from 'axios';
 
+const API_URL = 'http://192.168.0.114:3000/api/startday';
 // 1. Blue Theme Define kiya hai
 const theme = {
   ...DefaultTheme,
@@ -99,33 +100,72 @@ export default function StartDayScreen() {
 
 
     // Prepare form data
-      const submissionData = {
-        meterReadings: meterReadings,
-        photoUri: photoUri,
+      const payloadData = {
+        meterReadings: meterReadings.trim(),       
         location: {
              latitude: currentLocation?.latitude,
              longitude: currentLocation?.longitude,
+             timeStamp: new Date().toISOString(),
         },
+        photoUri: photoUri,
         
       };
+
+
+      const startDayData = await AsyncStorage.setItem('startDaydata' , JSON.stringify(payloadData));
+      console.log('Data saved to AsyncStorage: ' , startDayData);
+
+
       
-      // show data in console (for testing)
-      console.log("final payload data submission...");
-      console.log("Submission Data: " , submissionData);
-      const payload = AsyncStorage.setItem('startDaydata' , JSON.stringify(submissionData));
-      console.log("Payload stored in AsyncStorage." , payload);
+     
+      console.log("Submission Data: " , payloadData);
+      // const payload = AsyncStorage.setItem('startDaydata' , JSON.stringify(payloadData));
       
+
+      const formData = new FormData();
+      formData.append('data' , JSON.stringify(payloadData));
+
+      console.log('Form Data Prepared' , formData);
       
+      //  Agar photo hai to usko bhi append karte hain
+      
+      if(photoUri){
+        const fileName = photoUri.split('/').pop() || 'readings.jpg';
+        formData.append('image' , {
+          uri: photoUri,
+          name: fileName,
+          type: 'image/jpeg',
+        } as any);
+      }
+
        
+
+      // form data in console for verification
+      console.log('Submitting Form Data: ' , formData);
+      console.log('------------------------------');
       //  API submission
     try{
       
-      // Abhi API call ko skip karte hain, sirf simulation karte hain
-        await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await axios.post(API_URL , formData , {
+        headers:{
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-        setLoading(false);
-        Alert.alert('Success' , 'Your day has been started successfully!');
-        router.replace('/main');
+      if(response){
+        console.log('Submission Successful: ' , response.data);
+        Alert.alert('Success' , 'Your start day data has been submitted successfully.');
+        await AsyncStorage.removeItem('startDaydata');
+        setTimeout(()=>{
+
+          router.replace('/main');
+        }, 2000);
+        
+      
+      }
+      else{
+        Alert.alert('Submission Failed' , 'Failed to submit your data. Please try again.');
+      }
 
       
 
