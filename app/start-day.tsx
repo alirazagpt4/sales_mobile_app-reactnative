@@ -156,11 +156,12 @@ export default function StartDayScreen() {
         console.log('Submission Successful: ' , response.data);
         Alert.alert('Success' , 'Your start day data has been submitted successfully.');
         await AsyncStorage.removeItem('startDaydata');
+        
         setTimeout(()=>{
 
           router.replace('/main');
-        }, 2000);
-        
+        }, 3000);
+
       
       }
       else{
