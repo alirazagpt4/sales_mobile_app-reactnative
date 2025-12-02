@@ -57,7 +57,7 @@ react {
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -77,13 +77,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.simpletodoapp"
+    namespace "com.sales_dvr"
     defaultConfig {
-        applicationId "com.simpletodoapp"
+        applicationId "com.sales_dvr"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
     }
     signingConfigs {
         debug {
@@ -91,6 +91,14 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+
+        // 🛑 NAYA RELEASE CONFIGURATION
+        release { 
+            storeFile file('D:/MyKeys/my-upload-key.keystore') // <-- NAYI KEY KA PATH
+            storePassword 'Ali1234'
+            keyAlias 'my-app-alias' // <-- NAYA ALIAS (Jo aapne set kiya tha)
+            keyPassword 'Ali1234'
         }
     }
     buildTypes {
@@ -100,9 +108,13 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+
+            // 🛑 DEBUG KE BAJAY RELEASE KEY USE KAREN
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+
+            manifestPlaceholders = [usesCleartextTraffic: true]
         }
     }
 }

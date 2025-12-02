@@ -1,4 +1,4 @@
 {
-  "name": "SimpleTodoApp",
-  "displayName": "SimpleTodoApp"
+  "name": "sales_dvr",  // <--- Yahan SMALL LETTERS mein wohi naam dein jo MainActivity.kt mein hai
+  "displayName": "Sales DVR" // <--- Display name user ko dikhega
 }

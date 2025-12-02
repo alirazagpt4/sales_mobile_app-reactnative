@@ -1,4 +1,4 @@
-package com.simpletodoapp
+package com.sales_dvr
 
 import android.app.Application
 import com.facebook.react.PackageList
