@@ -16,6 +16,8 @@ import LoginScreen from './src/LoginScreen'; // Login Screen zaroori hai
 import MainScreen from './src/MainScreen';
 import StartDayScreen from './src/StartDayScreen';
 import VisitsScreen from './src/VisitsScreen';
+import AddNewCustomerScreen from './src/AddNewCustomerScreen';
+import CustomerListScreen from './src/CustomersListScreen';
 
 // 1. Stack Navigator aur Routes define karein
 const Stack = createNativeStackNavigator();
@@ -67,8 +69,23 @@ function RootNavigation(): React.JSX.Element {
           <Stack.Screen
             name='Visits'
             component={VisitsScreen}
+            options={{ 
+            headerShown: true, 
+            title: 'Select Visit Type' 
+          }}
             
             />
+
+            <Stack.Screen 
+                    name="AddNewCustomer" 
+                    component={AddNewCustomerScreen} 
+                    options={{ title: 'Add New Customer' }}
+                />
+                <Stack.Screen 
+                    name="CustomerList" 
+                    component={CustomerListScreen} 
+                    options={{ title: 'Customer List' }}
+                />
 
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,9 +1,11 @@
 // VisitsScreen.tsx
 
 import { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
+// 🛑 FIX: Yahan 'Text' ko 'RNText' naam diya gaya hai taake woh Paper ke 'Text' se takraaye nahi.
+import { View, StyleSheet, TouchableOpacity, Text as RNText } from "react-native";
 import {
-  Text,
+  // ✅ Yahan hum Paper ke components ko import kar rahe hain
+  Text, // <--- Yeh 'react-native-paper' ka Text component hai
   Button,
   Provider as PaperProvider,
   MD3LightTheme as DefaultTheme,
@@ -16,9 +18,9 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 // Navigation Type (simple)
 type RootStackParamList = {
-  // Yahan aapko woh screens define karni hongi jahan aap existing/new user par click karke jana chahte hain.
-  // Maslan (for example): 'ExistingUserVisit' or 'NewUserForm'
-  Main: undefined; 
+  Main: undefined;
+  CustomerList: undefined;
+  AddNewCustomer: undefined;
 };
 
 type VisitsNav = NativeStackNavigationProp<RootStackParamList, "Main">;
@@ -40,9 +42,7 @@ export default function VisitsScreen() {
   // Jab Existing User button press ho
   const handleExistingUserVisit = () => {
     setLoadingExisting(true);
-    // TODO: Existing User ke liye Navigation logic yahan aayega
-    Alert.alert("Navigation", "Hum Existing User Visit Screen par jaa rahe hain.");
-    // For example: navigation.navigate("ExistingUserVisit");
+    navigation.navigate("CustomerList");
     setTimeout(() => {
       setLoadingExisting(false);
     }, 1000);
@@ -51,9 +51,7 @@ export default function VisitsScreen() {
   // Jab New User button press ho
   const handleNewUserVisit = () => {
     setLoadingNew(true);
-    // TODO: New User ke liye Navigation logic yahan aayega
-    Alert.alert("Navigation", "Hum New User Form Screen par jaa rahe hain.");
-    // For example: navigation.navigate("NewUserForm");
+    navigation.navigate("AddNewCustomer");
     setTimeout(() => {
       setLoadingNew(false);
     }, 1000);
@@ -73,12 +71,13 @@ export default function VisitsScreen() {
           disabled={loadingExisting || loadingNew}
         >
           <Ionicons name="people-circle-outline" size={30} color="#007bff" />
-          <Text style={styles.buttonText}>
+          <Text style={[styles.buttonText, { color: '#007bff' }]}>
             Existing Customer
           </Text>
         </TouchableOpacity>
 
-        <Text style={styles.orText}>Or</Text> {/* 'OR' ki jagah 'YA' use kiya hai */}
+        {/* 🛑 FIX: Ab yahan hum RNText (React Native ka default Text) use kar rahe hain */}
+        <RNText style={styles.orText}>OR</RNText>
 
         {/* New User Button */}
         <TouchableOpacity
@@ -87,7 +86,8 @@ export default function VisitsScreen() {
           disabled={loadingNew || loadingExisting}
         >
           <Ionicons name="person-add-outline" size={30} color="#28a745" />
-          <Text style={[styles.buttonText, { color: "#28a745" }]}>
+          {/* Text color green set kiya gaya */}
+          <Text style={[styles.buttonText, { color: '#28a745' }]}>
             New Customer
           </Text>
         </TouchableOpacity>
@@ -97,7 +97,7 @@ export default function VisitsScreen() {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          Wapis Jaayen
+          Go Back
         </Button>
 
       </View>
@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     fontSize: 18,
     fontWeight: "700",
+    // Default color '#007bff'
     color: "#007bff",
   },
   orText: {
@@ -145,6 +146,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   backButton: {
-      marginTop: 30,
+    marginTop: 30,
   }
 });
