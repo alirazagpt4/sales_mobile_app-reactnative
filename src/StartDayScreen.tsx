@@ -36,7 +36,7 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: "#007bff",
+    primary: "#70ac3b",
     onPrimary: "#ffffff",
   },
 };
@@ -205,7 +205,7 @@ useEffect(() => {
           <Ionicons
             name={photoUri ? "checkmark-circle" : "camera-outline"}
             size={30}
-            color={photoUri ? "green" : "#007bff"}
+            color={photoUri ? "#70ac3b" : "##fdc440"}
           />
           <Text style={styles.buttonText}>
             {photoUri ? "Photo Captured" : "Take Picture"}
@@ -252,36 +252,37 @@ const styles = StyleSheet.create({
   headerText: {
     fontWeight: "bold",
     marginBottom: 40,
-    color: "#007bff",
+    color: "#70ac3b",
     textAlign: "center",
     marginTop: 20,
   },
   input: {
     marginBottom: 15,
     backgroundColor: "#fff",
+    
   },
   photoButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#007bff",
+    borderColor: "#70ac3b",
     borderRadius: 8,
     padding: 15,
     marginBottom: 10,
-    backgroundColor: "#e6f0ff",
+    backgroundColor: "#d1e2c5",
   },
   buttonText: {
     marginLeft: 10,
     fontSize: 16,
     fontWeight: "600",
-    color: "#007bff",
+    color: "#70ac3b",
   },
   orText: {
     textAlign: "center",
     marginBottom: 20,
     fontSize: 16,
-    color: "#555",
+    color: "#70ac3b",
     fontWeight: "bold",
   },
   locationWaiting: {

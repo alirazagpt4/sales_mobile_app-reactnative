@@ -4,7 +4,7 @@ import {
   StyleSheet, 
   Animated, 
   Text, 
-
+ Image
   
 } from 'react-native';
 // React Navigation se zaroori types aur hook import kiye
@@ -18,6 +18,8 @@ type RootStackParamList = {
   Splash: undefined;
   // Agar koi aur screens hain toh unhein bhi yahan add karein
 };
+
+const logo = require('./assets/farmsolution.png');
 
 export default function SplashScreen() {
   // Navigation hook ko sahi type dekar use kiya
@@ -50,9 +52,11 @@ export default function SplashScreen() {
     <View style={styles.container}>
       <Animated.View style={[{ opacity: fadeAnim }]}>
         {/* Standard React Native Text, H1 style ke liye font size set kiya */}
-        <Text style={styles.text}>
-          Splash Screen
-        </Text>
+        <Image 
+          source={logo} 
+          style={styles.logo} 
+          resizeMode="contain" 
+        />
       </Animated.View>
     </View>
   );
@@ -70,5 +74,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#007bff', // Blue color
     textAlign: 'center',
+  },
+  logo: { 
+    // Aap is size ko apni zaroorat ke mutabiq badal sakte hain
+    width: 250, 
+    height: 250, 
   },
 });

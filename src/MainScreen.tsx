@@ -35,8 +35,8 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#007bff',
-    onSurface: '#333',
+    primary: '#70ac3b', // Blue color
+    onPrimary: '#ffffff', // Button text white
   },
 };
 
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   headerText: { 
     fontWeight: 'bold', 
-    color: '#007bff', 
+    color: '#70ac3b', 
     textAlign: 'center',
     marginTop: 40,
     marginBottom: 40, 

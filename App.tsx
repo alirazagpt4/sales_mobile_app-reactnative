@@ -71,7 +71,7 @@ function RootNavigation(): React.JSX.Element {
             component={VisitsScreen}
             options={{ 
             headerShown: true, 
-            title: 'Select Visit Type' 
+            title: 'Select Customers' 
           }}
             
             />

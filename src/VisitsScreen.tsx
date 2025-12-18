@@ -29,7 +29,7 @@ const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: "#007bff",
+    primary: "#70ac3b",
     onPrimary: "#ffffff",
   },
 };
@@ -61,7 +61,7 @@ export default function VisitsScreen() {
     <PaperProvider theme={theme}>
       <View style={styles.container}>
         <Text variant="headlineMedium" style={styles.headerText}>
-          Select Visit Type
+          Select Customers
         </Text>
 
         {/* Existing User Button */}
@@ -70,8 +70,8 @@ export default function VisitsScreen() {
           onPress={handleExistingUserVisit}
           disabled={loadingExisting || loadingNew}
         >
-          <Ionicons name="people-circle-outline" size={30} color="#007bff" />
-          <Text style={[styles.buttonText, { color: '#007bff' }]}>
+          <Ionicons name="people-circle-outline" size={30} color="#70ac3b" />
+          <Text style={[styles.buttonText, { color: '#70ac3b' }]}>
             Existing Customer
           </Text>
         </TouchableOpacity>
@@ -85,9 +85,9 @@ export default function VisitsScreen() {
           onPress={handleNewUserVisit}
           disabled={loadingNew || loadingExisting}
         >
-          <Ionicons name="person-add-outline" size={30} color="#28a745" />
+          <Ionicons name="person-add-outline" size={30} color="#70ac3b" />
           {/* Text color green set kiya gaya */}
-          <Text style={[styles.buttonText, { color: '#28a745' }]}>
+          <Text style={[styles.buttonText, { color: '#70ac3b' }]}>
             New Customer
           </Text>
         </TouchableOpacity>
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontWeight: "bold",
     marginBottom: 40,
-    color: "#007bff",
+    color: "#70ac3b",
     textAlign: "center",
     marginTop: 20,
   },
@@ -124,19 +124,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   existingUserButton: {
-    borderColor: "#007bff",
-    backgroundColor: "#e6f0ff", // Halka neela (light blue)
+    borderColor: "#70ac3b",
+    backgroundColor: "#d1e2c5", // Halka neela (light blue)
   },
   newUserButton: {
-    borderColor: "#28a745", // Sabz (green) border
-    backgroundColor: "#e0f7e9", // Halka sabz (light green)
+    borderColor: "#70ac3b", // Sabz (green) border
+    backgroundColor: "#d1e2c5", // Halka sabz (light green)
   },
   buttonText: {
     marginLeft: 15,
     fontSize: 18,
     fontWeight: "700",
-    // Default color '#007bff'
-    color: "#007bff",
+   
+    color: "#70ac3b",
   },
   orText: {
     textAlign: "center",
