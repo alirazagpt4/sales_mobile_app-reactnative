@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    View, 
-    StyleSheet, 
-    ScrollView, 
-    Alert, 
-    Platform, 
-    SafeAreaView, 
-    StatusBar 
+import {
+    View,
+    StyleSheet,
+    ScrollView,
+    Alert,
+    Platform,
+    SafeAreaView,
+    StatusBar,
+    PermissionsAndroid 
 } from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+
 import {
     Text,
     TextInput,
@@ -63,6 +66,51 @@ export default function AddNewCustomerScreen() {
     const [customerType, setCustomerType] = useState<string | undefined>(undefined);
     const [loading, setLoading] = useState(false);
 
+
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
+    const [locationLoading, setLocationLoading] = useState(false);
+
+
+    const getLocation = async () => {
+        setLocationLoading(true);
+
+        // Android Permission Check
+        if (Platform.OS === 'android') {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+            );
+            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                Alert.alert("Permission Denied", "Location permission is required.");
+                setLocationLoading(false);
+                return;
+            }
+        }
+
+        // Get Current Position
+        Geolocation.getCurrentPosition(
+            (position) => {
+                setLatitude(position.coords.latitude);
+                setLongitude(position.coords.longitude);
+                setLocationLoading(false);
+            },
+            (error) => {
+                console.log(error.code, error.message);
+                Alert.alert("Location Error", error.message);
+                setLocationLoading(false);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+    };
+
+
+    useEffect(() => {
+        getLocation();
+    }, [])
+
+
+
+
     // Fetch City Name
     useEffect(() => {
         if (typeof userCityId === 'number' && token) {
@@ -92,6 +140,15 @@ export default function AddNewCustomerScreen() {
             Alert.alert('Required Fields', 'Please fill all fields to continue.');
             return false;
         }
+
+
+        // New Check: Location capture hui ya nahi
+        if (latitude === null || longitude === null) {
+            Alert.alert('Location Required', 'Please wait until customer location is captured or press refresh.');
+            return false;
+        }
+
+
         if (contact.length !== 11) {
             Alert.alert('Invalid Contact', 'Contact number must be 11 digits.');
             return false;
@@ -112,6 +169,8 @@ export default function AddNewCustomerScreen() {
                 bags_potential: parseInt(bagsPotential) || 0,
                 type: customerType,
                 city_id: userCityId,
+                latitude: latitude,
+                longitude: longitude,
             };
 
             await axios.post(`${API_URL}/api/customers/create-customer`, payload, {
@@ -119,13 +178,16 @@ export default function AddNewCustomerScreen() {
             });
 
             Alert.alert('Success', 'Customer added successfully!');
-            
+
             setArea('');
             setBagsPotential('');
             setContact('');
             setCustomerName('');
             setCustomerType('');
             setTehsil('');
+            setLatitude(null); // Clear lat
+            setLongitude(null); // Clear long
+
             setTimeout(() => {
                 setLoading(false);
                 navigation.navigate('CustomerList');
@@ -141,18 +203,33 @@ export default function AddNewCustomerScreen() {
         <PaperProvider theme={theme}>
             <SafeAreaView style={styles.safeArea}>
                 <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-                
+
                 <View style={styles.header}>
                     <Text variant="headlineSmall" style={styles.headerText}>
-                       Add New Customer
+                        Add New Customer
                     </Text>
                 </View>
 
-                <ScrollView 
-                    style={styles.container} 
+                <ScrollView
+                    style={styles.container}
                     contentContainerStyle={styles.contentContainer}
                     showsVerticalScrollIndicator={false}
                 >
+
+                    <View style={styles.dropdownWrapper}>
+                        <Dropdown
+                            label="Select Customer Type"
+                            value={customerType}
+                            onSelect={setCustomerType}
+                            options={[
+                                { label: 'Farmer', value: 'Farmer' },
+                                { label: 'Dealer', value: 'Dealer' },
+                            ]}
+                            mode="outlined"
+                        />
+                    </View>
+
+
                     <TextInput
                         label="Customer Name"
                         value={customerName}
@@ -206,6 +283,22 @@ export default function AddNewCustomerScreen() {
                     />
 
                     <TextInput
+                        label="Customer Location (Lat, Long)"
+                        value={locationLoading ? 'Fetching Location...' : (latitude ? `${latitude.toFixed(6)}, ${longitude?.toFixed(6)}` : 'Location not captured')}
+                        mode="outlined"
+                        editable={false}
+                        style={[styles.input, styles.readOnlyInput]}
+                        left={<TextInput.Icon icon={() => <Feather name="map-pin" size={20} color="#70ac3b" />} />}
+                        right={
+                            locationLoading ? (
+                                <TextInput.Icon icon={() => <ActivityIndicator size="small" color="#70ac3b" />} />
+                            ) : (
+                                <TextInput.Icon icon="refresh" onPress={getLocation} color="#70ac3b" />
+                            )
+                        }
+                    />
+
+                    <TextInput
                         label="Bags Potential"
                         value={bagsPotential}
                         onChangeText={setBagsPotential}
@@ -216,18 +309,7 @@ export default function AddNewCustomerScreen() {
                         left={<TextInput.Icon icon={() => <Feather name="package" size={20} color="#777" />} />}
                     />
 
-                    <View style={styles.dropdownWrapper}>
-                        <Dropdown
-                            label="Select Customer Type"
-                            value={customerType}
-                            onSelect={setCustomerType}
-                            options={[
-                                { label: 'Farmer', value: 'Farmer' },
-                                { label: 'Dealer', value: 'Dealer' },
-                            ]}
-                            mode="outlined"
-                        />
-                    </View>
+
 
                     <Button
                         mode="contained"

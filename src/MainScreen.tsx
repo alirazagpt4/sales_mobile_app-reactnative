@@ -1,4 +1,5 @@
 import type { ComponentProps } from 'react';
+import { Alert } from 'react-native';
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 
@@ -64,64 +65,75 @@ export default function MainScreen() {
   const navigation = useNavigation<MainScreenNavigationProp>(); 
   const { logout } = useAuth();
   
-  const handleLogout = async () => {
-    await logout();
-    // 🛑 React Navigation: Logout ke baad Login screen par redirect
-    navigation.replace('Login'); 
-  }
+ const handleLogout = () => {
+    Alert.alert(
+      "Logout Confirmation", // Professional Title
+      "Are you sure you want to log out?", // Professional Message
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Logout Cancelled"),
+          style: "cancel"
+        },
+        { 
+          text: "Logout", 
+          onPress: async () => {
+            await logout();
+            navigation.replace('Login'); 
+          },
+          style: "destructive" 
+        }
+      ],
+      { cancelable: true }
+    );
+  };
 
-  return (
+ return (
     <PaperProvider theme={theme}>
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          
-          {/* Main Header */}
+          {/* Header */}
           <Text variant="headlineLarge" style={styles.headerText}>
-            Dashboard
+            Welcome Back!
           </Text>
 
-          {/* --- 🌟 Two Tiles Side-by-Side --- */}
+          {/* Tiles Section */}
           <View style={styles.dashboardGrid}>
-            
-            {/* Tile 1: Start Day */}
             <DashboardItem 
               icon="sunny-outline" 
               label="Start Day" 
-              // 🛑 React Navigation: 'start-day' screen par navigate
               onPress={() => navigation.navigate('StartDay')} 
             />
-            
-            {/* Tile 2: Visits */}
             <DashboardItem 
               icon="location-outline" 
               label="Visits" 
-              // 🛑 React Navigation: 'visits' screen par navigate
               onPress={() => navigation.navigate('Visits')} 
             />
-            
           </View>
-          {/* ----------------------------- */}
           
           <View style={styles.filler} />
-
         </ScrollView>
         
-        {/* Logout Section (Fixed at bottom) */}
+        {/* Logout Section */}
         <View style={styles.logoutSection}>
-          <Text style={styles.welcomeText}>Welcome Back!</Text>
+
           <Button 
             mode="contained" 
-            onPress={handleLogout} 
+            onPress={handleLogout} // ✅ Alert function trigger hoga
             style={styles.button}
             labelStyle={styles.buttonLabel}
+            // ✅ Logout Icon for professional look
+            icon={({ size, color }) => (
+              <Ionicons name="log-out-outline" size={size} color={color} />
+            )}
           >
             Logout
           </Button>
         </View>
-        
       </View>
     </PaperProvider>
   );
+
 }
 
 const windowHeight = Dimensions.get('window').height;

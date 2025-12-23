@@ -61,7 +61,7 @@ export default function VisitsScreen() {
     <PaperProvider theme={theme}>
       <View style={styles.container}>
         <Text variant="headlineMedium" style={styles.headerText}>
-          Select Customers
+          Mark Visit
         </Text>
 
         {/* Existing User Button */}
