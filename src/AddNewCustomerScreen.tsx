@@ -7,7 +7,7 @@ import {
     Platform,
     SafeAreaView,
     StatusBar,
-    PermissionsAndroid 
+    PermissionsAndroid
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 
@@ -71,6 +71,8 @@ export default function AddNewCustomerScreen() {
     const [longitude, setLongitude] = useState<number | null>(null);
     const [locationLoading, setLocationLoading] = useState(false);
 
+    const [address, setAddress] = useState(''); // Display ke liye
+
 
     const getLocation = async () => {
         setLocationLoading(true);
@@ -89,9 +91,31 @@ export default function AddNewCustomerScreen() {
 
         // Get Current Position
         Geolocation.getCurrentPosition(
-            (position) => {
+            async (position) => {
                 setLatitude(position.coords.latitude);
                 setLongitude(position.coords.longitude);
+
+
+
+                // Reverse Geocoding (Lat/Lng se Address nikalna)
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
+                        {
+                            headers: {
+                                'User-Agent': 'FSPL' // Apni app ka naam likh dein
+                            }
+                        }
+                    );
+                    const data = await response.json();
+                    // Chota address dikhane ke liye (e.g., "Street 5, Faisalabad")
+                    const shortAddress = data.display_name;
+                    setAddress(shortAddress);
+                } catch (error) {
+                    setAddress(``); // Error par coords dikha dein
+                }
+
+
                 setLocationLoading(false);
             },
             (error) => {
@@ -187,6 +211,7 @@ export default function AddNewCustomerScreen() {
             setTehsil('');
             setLatitude(null); // Clear lat
             setLongitude(null); // Clear long
+            getLocation(); // Re-fetch location
 
             setTimeout(() => {
                 setLoading(false);
@@ -283,8 +308,8 @@ export default function AddNewCustomerScreen() {
                     />
 
                     <TextInput
-                        label="Customer Location (Lat, Long)"
-                        value={locationLoading ? 'Fetching Location...' : (latitude ? `${latitude.toFixed(6)}, ${longitude?.toFixed(6)}` : 'Location not captured')}
+                        label="Customer Location"
+                        value={locationLoading ? 'Fetching Location...' : (address ? address : 'Location not captured')}
                         mode="outlined"
                         editable={false}
                         style={[styles.input, styles.readOnlyInput]}
