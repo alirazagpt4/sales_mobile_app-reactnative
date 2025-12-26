@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    View, 
-    StyleSheet, 
-    FlatList, 
-    TouchableOpacity, 
-    Alert, 
-    PermissionsAndroid, 
-    Platform, 
+import {
+    View,
+    StyleSheet,
+    FlatList,
+    TouchableOpacity,
+    Alert,
+    PermissionsAndroid,
+    Platform,
     SafeAreaView, // 🛑 Added for professional layout
-    StatusBar 
+    StatusBar
 } from 'react-native';
-import { Text, TextInput, Provider as PaperProvider, MD3LightTheme as DefaultTheme, ActivityIndicator } from 'react-native-paper';
+import { Text, TextInput, Provider as PaperProvider, MD3LightTheme as DefaultTheme, ActivityIndicator, Modal, Portal, RadioButton, Button as PaperButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useAuth } from './context/AuthContext';
@@ -37,6 +37,11 @@ export default function CustomerListScreen() {
     const [loading, setLoading] = useState(false);
     const [visitLoading, setVisitLoading] = useState(false);
     const [visitStatus, setVisitStatus] = useState<Record<number, number>>({});
+
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedPurpose, setSelectedPurpose] = useState('New'); // Default: New
+    const [activeCustomerId, setActiveCustomerId] = useState<number | null>(null);
 
     useEffect(() => {
         const loadVisitFlags = async () => {
@@ -69,7 +74,7 @@ export default function CustomerListScreen() {
             const response = await axios.get(`${BASE_URL}/api/customers/by-city`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setCustomers(response.data.customers); 
+            setCustomers(response.data.customers);
         } catch (error) {
             Alert.alert("Error", "Failed to load customer list.");
         } finally {
@@ -91,13 +96,71 @@ export default function CustomerListScreen() {
         return false;
     };
 
-    const handleVisit = async (customer_id: number) => {
+
+    // 🛑 Step 1: Pehle sirf Modal dikhayen
+    const openVisitModal = (customer_id: number) => {
+        setActiveCustomerId(customer_id);
+        setIsModalVisible(true);
+    };
+
+    // const handleVisit = async (customer_id: number) => {
+    //     const hasPermission = await requestLocationPermission();
+    //     if (!hasPermission) {
+    //         Alert.alert("Permission Denied", "Location permission is required.");
+    //         return;
+    //     }
+
+    //     setVisitLoading(true);
+
+    //     Geolocation.getCurrentPosition(
+    //         async (position) => {
+    //             const { latitude, longitude } = position.coords;
+    //             try {
+    //                 const payload = {
+    //                     customer_id,
+    //                     latitude,
+    //                     longitude,
+    //                     purpose: "Visit",
+    //                     date: new Date().toISOString().split("T")[0],
+    //                     remarks: "Visit logged from mobile app.",
+    //                 };
+
+    //                 await axios.post(
+    //                     `${BASE_URL}/api/visits/create-visit`,
+    //                     payload,
+    //                     { headers: { Authorization: `Bearer ${token}` } }
+    //                 );
+
+    //                 Alert.alert("Success", "Visit marked successfully!");
+    //                 const updatedFlags = { ...visitStatus, [customer_id]: Date.now() };
+    //                 setVisitStatus(updatedFlags);
+    //                 await AsyncStorage.setItem("@VisitFlags", JSON.stringify(updatedFlags));
+    //             } catch (apiError) {
+    //                 Alert.alert("Error", "Server error marking visit.");
+    //             } finally {
+    //                 setVisitLoading(false);
+    //             }
+    //         },
+    //         (error) => {
+    //             setVisitLoading(false);
+    //             Alert.alert("Location Error", "GPS signal slow or off.");
+    //         },
+    //         { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    //     );
+    // };
+
+
+    // 🛑 Step 2: Confirmation ke baad asal API call
+    const confirmAndMarkVisit = async () => {
+        if (activeCustomerId === null) return;
+
         const hasPermission = await requestLocationPermission();
         if (!hasPermission) {
             Alert.alert("Permission Denied", "Location permission is required.");
             return;
         }
 
+        setIsModalVisible(false); // Modal band kar dein
         setVisitLoading(true);
 
         Geolocation.getCurrentPosition(
@@ -105,13 +168,16 @@ export default function CustomerListScreen() {
                 const { latitude, longitude } = position.coords;
                 try {
                     const payload = {
-                        customer_id,
+                        customer_id: activeCustomerId,
                         latitude,
                         longitude,
-                        purpose: "Visit",
+                        purpose: selectedPurpose, // 🛑 Payload mein selected value (New/Old/Mature) ja rahi hai
                         date: new Date().toISOString().split("T")[0],
-                        remarks: "Visit logged from mobile app.",
+                        remarks: `Visit logged from mobile app as ${selectedPurpose}.`,
                     };
+
+
+                    console.log("payload ........ " , payload)
 
                     await axios.post(
                         `${BASE_URL}/api/visits/create-visit`,
@@ -119,14 +185,15 @@ export default function CustomerListScreen() {
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
 
-                    Alert.alert("Success", "Visit marked successfully!");
-                    const updatedFlags = { ...visitStatus, [customer_id]: Date.now() };
+                    Alert.alert("Success", `Visit marked as ${selectedPurpose}!`);
+                    const updatedFlags = { ...visitStatus, [activeCustomerId]: Date.now() };
                     setVisitStatus(updatedFlags);
                     await AsyncStorage.setItem("@VisitFlags", JSON.stringify(updatedFlags));
                 } catch (apiError) {
                     Alert.alert("Error", "Server error marking visit.");
                 } finally {
                     setVisitLoading(false);
+                    setActiveCustomerId(null);
                 }
             },
             (error) => {
@@ -153,12 +220,45 @@ export default function CustomerListScreen() {
             {/* 🛑 SafeAreaView prevents content from hiding under status bar/notch */}
             <SafeAreaView style={styles.safeArea}>
                 <StatusBar barStyle="dark-content" backgroundColor="#f4f4f4" />
-                
+
+
+                {/* 🛑 Portal ke andar Modal design kiya gaya hai */}
+                <Portal>
+                    <Modal
+                        visible={isModalVisible}
+                        onDismiss={() => setIsModalVisible(false)}
+                        contentContainerStyle={styles.modalContent}
+                    >
+                        <Text style={styles.modalTitle}>Select Visit Purpose</Text>
+
+                        {/* 🛑 Radio Button Group Logic */}
+                        <RadioButton.Group onValueChange={newValue => setSelectedPurpose(newValue)} value={selectedPurpose}>
+                            <View style={styles.radioRow}>
+                                <RadioButton value="New" color={theme.colors.primary} />
+                                <Text>New (Fresh Prospect)</Text>
+                            </View>
+                            <View style={styles.radioRow}>
+                                <RadioButton value="Old" color={theme.colors.primary} />
+                                <Text>Old (Follow-up)</Text>
+                            </View>
+                            <View style={styles.radioRow}>
+                                <RadioButton value="Mature" color={theme.colors.primary} />
+                                <Text>Mature (Order Taken)</Text>
+                            </View>
+                        </RadioButton.Group>
+
+                        <View style={styles.modalActions}>
+                            <PaperButton onPress={() => setIsModalVisible(false)}>Cancel</PaperButton>
+                            <PaperButton mode="contained" onPress={confirmAndMarkVisit}>Confirm</PaperButton>
+                        </View>
+                    </Modal>
+                </Portal>
+
                 <View style={styles.container}>
                     {/* Header Title with proper top margin */}
                     <View style={styles.headerContainer}>
                         <Text variant="headlineSmall" style={styles.headerText}>
-                           Customer List
+                            Customer List
                         </Text>
                     </View>
 
@@ -190,16 +290,16 @@ export default function CustomerListScreen() {
                                 <View style={styles.card}>
                                     <View style={styles.cardHeader}>
                                         <Text style={styles.name}>{item.customer_name}</Text>
-                                        <Text style={styles.badge}>{item.type}</Text> 
+                                        <Text style={styles.badge}>{item.type}</Text>
                                     </View>
-                                    
+
                                     <View style={styles.detailRow}>
-                                        <Feather name="phone" size={14} color="#666" style={{marginRight: 5}} />
+                                        <Feather name="phone" size={14} color="#666" style={{ marginRight: 5 }} />
                                         <Text style={styles.details}>{item.contact}</Text>
                                     </View>
-                                    
+
                                     <View style={styles.detailRow}>
-                                        <Feather name="map-pin" size={14} color="#666" style={{marginRight: 5}} />
+                                        <Feather name="map-pin" size={14} color="#666" style={{ marginRight: 5 }} />
                                         <Text style={styles.details}>{item.area}, {item.tehsil}</Text>
                                     </View>
 
@@ -209,8 +309,9 @@ export default function CustomerListScreen() {
                                             isVisitedRecently(item.id) ? styles.btnVisited : styles.btnVisit,
                                             visitLoading && { opacity: 0.7 }
                                         ]}
-                                        onPress={() => !visitLoading && handleVisit(item.id)}
-                                        disabled={visitLoading}
+                                        // 🛑 Button press par ab Modal khulega
+                                        onPress={() => !visitLoading && !isVisitedRecently(item.id) && openVisitModal(item.id)}
+                                        disabled={visitLoading || isVisitedRecently(item.id)}
                                     >
                                         <Text style={styles.visitBtnText}>
                                             {isVisitedRecently(item.id) ? "✅ Visited Today" : "Mark Visit"}
@@ -226,98 +327,124 @@ export default function CustomerListScreen() {
     );
 }
 
+// const styles = StyleSheet.create({
+//     safeArea: {
+//         flex: 1,
+//         backgroundColor: '#f4f4f4',
+//     },
+//     container: {
+//         flex: 1,
+//         paddingHorizontal: 16,
+//     },
+//     headerContainer: {
+//         paddingVertical: 15,
+//         marginTop: Platform.OS === 'android' ? 10 : 0,
+//         alignItems: 'center',
+//     },
+//     headerText: {
+//         fontWeight: 'bold',
+//         color: '#70ac3b',
+//         letterSpacing: 0.5,
+//     },
+//     searchBox: {
+//         marginBottom: 10,
+//         backgroundColor: '#fff',
+//         height: 50,
+//     },
+//     listContent: {
+//         paddingTop: 10,
+//         paddingBottom: 30,
+//     },
+//     card: {
+//         backgroundColor: "#fff",
+//         padding: 16,
+//         borderRadius: 12,
+//         marginBottom: 12,
+//         elevation: 2,
+//         shadowColor: "#000",
+//         shadowOffset: { width: 0, height: 1 },
+//         shadowOpacity: 0.1,
+//         shadowRadius: 3,
+//     },
+//     cardHeader: {
+//         flexDirection: 'row',
+//         justifyContent: 'space-between',
+//         alignItems: 'flex-start',
+//         marginBottom: 8,
+//     },
+//     name: {
+//         fontSize: 17,
+//         fontWeight: 'bold',
+//         color: '#222',
+//         flex: 1,
+//     },
+//     badge: {
+//         backgroundColor: '#f0f0f0',
+//         paddingHorizontal: 8,
+//         paddingVertical: 2,
+//         borderRadius: 4,
+//         fontSize: 11,
+//         color: '#70ac3b',
+//         fontWeight: 'bold',
+//         overflow: 'hidden',
+//     },
+//     detailRow: {
+//         flexDirection: 'row',
+//         alignItems: 'center',
+//         marginBottom: 4,
+//     },
+//     details: {
+//         color: "#555",
+//         fontSize: 14,
+//     },
+//     visitBtn: {
+//         paddingVertical: 12,
+//         borderRadius: 8,
+//         marginTop: 12,
+//         alignItems: 'center',
+//         flexDirection: 'row',
+//         justifyContent: 'center',
+//     },
+//     btnVisit: {
+//         backgroundColor: "#4072fdff",
+//     },
+//     btnVisited: {
+//         backgroundColor: "#28a745",
+//     },
+//     visitBtnText: {
+//         color: "#fff",
+//         fontWeight: "bold",
+//         fontSize: 15,
+//     },
+//     emptyText: {
+//         textAlign: 'center',
+//         marginTop: 30,
+//         color: '#999',
+//     }
+// });
+
+
+
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#f4f4f4',
-    },
-    container: {
-        flex: 1,
-        paddingHorizontal: 16,
-    },
-    headerContainer: {
-        paddingVertical: 15,
-        marginTop: Platform.OS === 'android' ? 10 : 0,
-        alignItems: 'center',
-    },
-    headerText: {
-        fontWeight: 'bold',
-        color: '#70ac3b',
-        letterSpacing: 0.5,
-    },
-    searchBox: {
-        marginBottom: 10,
-        backgroundColor: '#fff',
-        height: 50,
-    },
-    listContent: {
-        paddingTop: 10,
-        paddingBottom: 30,
-    },
-    card: {
-        backgroundColor: "#fff",
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 12,
-        elevation: 2,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 8,
-    },
-    name: {
-        fontSize: 17,
-        fontWeight: 'bold',
-        color: '#222',
-        flex: 1,
-    },
-    badge: {
-        backgroundColor: '#f0f0f0',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
-        fontSize: 11,
-        color: '#70ac3b',
-        fontWeight: 'bold',
-        overflow: 'hidden',
-    },
-    detailRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4,
-    },
-    details: {
-        color: "#555",
-        fontSize: 14,
-    },
-    visitBtn: {
-        paddingVertical: 12,
-        borderRadius: 8,
-        marginTop: 12,
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
-    btnVisit: {
-        backgroundColor: "#4072fdff",
-    },
-    btnVisited: {
-        backgroundColor: "#28a745",
-    },
-    visitBtnText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 15,
-    },
-    emptyText: {
-        textAlign: 'center',
-        marginTop: 30,
-        color: '#999',
-    }
+    safeArea: { flex: 1, backgroundColor: '#f4f4f4' },
+    container: { flex: 1, paddingHorizontal: 16 },
+    headerContainer: { paddingVertical: 15, marginTop: Platform.OS === 'android' ? 10 : 0, alignItems: 'center' },
+    headerText: { fontWeight: 'bold', color: '#70ac3b' },
+    searchBox: { marginBottom: 10, backgroundColor: '#fff', height: 50 },
+    listContent: { paddingTop: 10, paddingBottom: 30 },
+    card: { backgroundColor: "#fff", padding: 16, borderRadius: 12, marginBottom: 12, elevation: 2 },
+    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    name: { fontSize: 17, fontWeight: 'bold', color: '#222', flex: 1 },
+    badge: { backgroundColor: '#f0f0f0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, fontSize: 11, color: '#70ac3b', fontWeight: 'bold' },
+    detailRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+    details: { color: "#555", fontSize: 14 },
+    visitBtn: { paddingVertical: 12, borderRadius: 8, marginTop: 12, alignItems: 'center', justifyContent: 'center' },
+    btnVisit: { backgroundColor: "#3b83acff" }, // 🛑 Button color green set kiya
+    btnVisited: { backgroundColor: "#28a745" }, // 🛑 Already visited ka dark green
+    visitBtnText: { color: "#fff", fontWeight: "bold", fontSize: 15 },
+    // 🛑 Modal Styles
+    modalContent: { backgroundColor: 'white', padding: 25, margin: 20, borderRadius: 15 },
+    modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#70ac3b', marginBottom: 20, textAlign: 'center' },
+    radioRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+    modalActions: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 20 }
 });

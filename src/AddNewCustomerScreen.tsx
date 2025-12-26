@@ -33,6 +33,7 @@ type RootStackParamList = {
     Visits: undefined;
     AddNewCustomer: undefined;
     CustomerList: undefined;
+
 };
 
 const API_URL = "http://38.242.201.229";
@@ -64,6 +65,7 @@ export default function AddNewCustomerScreen() {
     const [tehsil, setTehsil] = useState('');
     const [bagsPotential, setBagsPotential] = useState('');
     const [customerType, setCustomerType] = useState<string | undefined>(undefined);
+    const [region, setRegion] = useState<string | undefined>(undefined);
     const [loading, setLoading] = useState(false);
 
 
@@ -160,7 +162,7 @@ export default function AddNewCustomerScreen() {
     }, [userCityId, token]);
 
     const validateForm = () => {
-        if (!customerName || !contact || !area || !tehsil || !customerType) {
+        if (!customerName || !contact || !area || !tehsil || !customerType || !region) {
             Alert.alert('Required Fields', 'Please fill all fields to continue.');
             return false;
         }
@@ -193,6 +195,7 @@ export default function AddNewCustomerScreen() {
                 bags_potential: parseInt(bagsPotential) || 0,
                 type: customerType,
                 city_id: userCityId,
+                region: region,
                 latitude: latitude,
                 longitude: longitude,
             };
@@ -212,10 +215,11 @@ export default function AddNewCustomerScreen() {
             setLatitude(null); // Clear lat
             setLongitude(null); // Clear long
             getLocation(); // Re-fetch location
+            setRegion(undefined)
 
             setTimeout(() => {
                 setLoading(false);
-                navigation.navigate('CustomerList');
+                navigation.navigate('Visits');
             }, 1500);
 
         } catch (error) {
@@ -229,8 +233,9 @@ export default function AddNewCustomerScreen() {
             <SafeAreaView style={styles.safeArea}>
                 <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
+                {/* Header Section - Thora compact */}
                 <View style={styles.header}>
-                    <Text variant="headlineSmall" style={styles.headerText}>
+                    <Text variant="titleLarge" style={styles.headerText}>
                         Add New Customer
                     </Text>
                 </View>
@@ -239,11 +244,12 @@ export default function AddNewCustomerScreen() {
                     style={styles.container}
                     contentContainerStyle={styles.contentContainer}
                     showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 >
-
-                    <View style={styles.dropdownWrapper}>
+                    {/* Compact Dropdown Wrapper */}
+                    <View style={styles.dropdownSection}>
                         <Dropdown
-                            label="Select Customer Type"
+                            label="Customer Type"
                             value={customerType}
                             onSelect={setCustomerType}
                             options={[
@@ -254,107 +260,123 @@ export default function AddNewCustomerScreen() {
                         />
                     </View>
 
+                    {/* Inputs - Thora Margin kam kiya hai */}
+                    <View style={styles.inputSection}>
+                        <TextInput
+                            label="Customer Name"
+                            value={customerName}
+                            onChangeText={setCustomerName}
+                            mode="outlined"
+                            dense // 🛑 Taake height kam ho jaye
+                            style={styles.input}
+                            placeholder="e.g., Amir Dogar"
+                            left={<TextInput.Icon icon={() => <Feather name="user" size={18} color="#777" />} />}
+                        />
 
-                    <TextInput
-                        label="Customer Name"
-                        value={customerName}
-                        onChangeText={setCustomerName}
-                        mode="outlined"
-                        style={styles.input}
-                        placeholder="e.g., Amir Dogar"
-                        left={<TextInput.Icon icon={() => <Feather name="user" size={20} color="#777" />} />}
-                    />
+                        <TextInput
+                            label="Contact (11 Digits)"
+                            value={contact}
+                            onChangeText={setContact}
+                            mode="outlined"
+                            dense
+                            style={styles.input}
+                            keyboardType="phone-pad"
+                            maxLength={11}
+                            left={<TextInput.Icon icon={() => <Feather name="phone" size={18} color="#777" />} />}
+                        />
 
-                    <TextInput
-                        label="Contact"
-                        value={contact}
-                        onChangeText={setContact}
-                        mode="outlined"
-                        style={styles.input}
-                        keyboardType="phone-pad"
-                        maxLength={11}
-                        placeholder="e.g., 03144987155"
-                        left={<TextInput.Icon icon={() => <Feather name="phone" size={20} color="#777" />} />}
-                    />
+                        <TextInput
+                            label="Area / Village"
+                            value={area}
+                            onChangeText={setArea}
+                            mode="outlined"
+                            dense
+                            style={styles.input}
+                            left={<TextInput.Icon icon={() => <Feather name="map" size={18} color="#777" />} />}
+                        />
 
-                    <TextInput
-                        label="Area"
-                        value={area}
-                        onChangeText={setArea}
-                        mode="outlined"
-                        style={styles.input}
-                        placeholder="e.g., Jhipal 73 chak"
-                        left={<TextInput.Icon icon={() => <Feather name="map" size={20} color="#777" />} />}
-                    />
+                        <View style={styles.row}>
+                            <TextInput
+                                label="Tehsil"
+                                value={tehsil}
+                                onChangeText={setTehsil}
+                                mode="outlined"
+                                dense
+                                style={[styles.input, { flex: 1, marginRight: 8 }]}
+                            />
+                             <TextInput
+                                label="Bags"
+                                value={bagsPotential}
+                                onChangeText={setBagsPotential}
+                                mode="outlined"
+                                dense
+                                keyboardType="numeric"
+                                style={[styles.input, { flex: 1 }]}
+                            />
+                        </View>
 
-                    <TextInput
-                        label="Tehsil"
-                        value={tehsil}
-                        onChangeText={setTehsil}
-                        mode="outlined"
-                        style={styles.input}
-                        placeholder="e.g., Faisalabad"
-                        left={<TextInput.Icon icon={() => <Feather name="navigation" size={20} color="#777" />} />}
-                    />
+                        <TextInput
+                            label="City (Auto)"
+                            value={loadingCityName ? 'Fetching...' : cityDisplayName}
+                            mode="outlined"
+                            dense
+                            editable={false}
+                            style={[styles.input, styles.readOnlyInput]}
+                            left={<TextInput.Icon icon={() => <Feather name="home" size={18} color="#777" />} />}
+                        />
 
-                    <TextInput
-                        label="City (Auto-Filled)"
-                        value={loadingCityName ? 'Fetching...' : cityDisplayName}
-                        mode="outlined"
-                        editable={false}
-                        style={[styles.input, styles.readOnlyInput]}
-                        left={<TextInput.Icon icon={() => <Feather name="home" size={20} color="#777" />} />}
-                        right={loadingCityName ? <TextInput.Icon icon={() => <ActivityIndicator size="small" />} /> : null}
-                    />
+                        <TextInput
+                            label="Location Info"
+                            value={locationLoading ? 'Fetching GPS...' : (address ? address : 'No GPS Fix')}
+                            mode="outlined"
+                            dense
+                            editable={false}
+                            multiline={false}
+                            style={[styles.input, styles.readOnlyInput]}
+                            left={<TextInput.Icon icon={() => <Feather name="map-pin" size={18} color="#70ac3b" />} />}
+                            right={<TextInput.Icon icon="refresh" onPress={getLocation} color="#70ac3b" size={20}/>}
+                        />
 
-                    <TextInput
-                        label="Customer Location"
-                        value={locationLoading ? 'Fetching Location...' : (address ? address : 'Location not captured')}
-                        mode="outlined"
-                        editable={false}
-                        style={[styles.input, styles.readOnlyInput]}
-                        left={<TextInput.Icon icon={() => <Feather name="map-pin" size={20} color="#70ac3b" />} />}
-                        right={
-                            locationLoading ? (
-                                <TextInput.Icon icon={() => <ActivityIndicator size="small" color="#70ac3b" />} />
-                            ) : (
-                                <TextInput.Icon icon="refresh" onPress={getLocation} color="#70ac3b" />
-                            )
-                        }
-                    />
+                        <View style={styles.dropdownSection}>
+                            <Dropdown
+                                label="Region"
+                                value={region}
+                                onSelect={setRegion}
+                                options={[
+                                    { label: 'Region 1', value: 'Region 1' },
+                                    { label: 'Region 2', value: 'Region 2' },
+                                    { label: 'Region 3', value: 'Region 3' },
+                                    { label: 'Region 4', value: 'Region 4' },
+                                    { label: 'Region 5', value: 'Region 5' },
+                                ]}
+                                mode="outlined"
+                            />
+                        </View>
+                    </View>
 
-                    <TextInput
-                        label="Bags Potential"
-                        value={bagsPotential}
-                        onChangeText={setBagsPotential}
-                        mode="outlined"
-                        style={styles.input}
-                        keyboardType="numeric"
-                        placeholder="e.g. 500"
-                        left={<TextInput.Icon icon={() => <Feather name="package" size={20} color="#777" />} />}
-                    />
+                    {/* Button Section - Zyada professional placement */}
+                    <View style={styles.buttonContainer}>
+                        <Button
+                            mode="contained"
+                            onPress={handleSaveCustomer}
+                            style={styles.saveButton}
+                            loading={loading}
+                            disabled={loading}
+                            contentStyle={styles.buttonHeight}
+                        >
+                            {loading ? 'Processing...' : 'Save Customer'}
+                        </Button>
 
-
-
-                    <Button
-                        mode="contained"
-                        onPress={handleSaveCustomer}
-                        style={styles.saveButton}
-                        loading={loading}
-                        disabled={loading}
-                        contentStyle={styles.saveButtonContent}
-                    >
-                        {loading ? 'Saving...' : 'Save Customer'}
-                    </Button>
-
-                    <Button
-                        mode="text"
-                        onPress={() => navigation.goBack()}
-                        style={styles.backButton}
-                        textColor="#666"
-                    >
-                        Cancel
-                    </Button>
+                        <Button
+                            mode="outlined" // 🛑 Cancel ko outlined kiya taake alag dikhay
+                            onPress={() => navigation.goBack()}
+                            style={styles.cancelButton}
+                            textColor="#666"
+                            contentStyle={styles.buttonHeight}
+                        >
+                            Cancel
+                        </Button>
+                    </View>
                 </ScrollView>
             </SafeAreaView>
         </PaperProvider>
@@ -367,42 +389,59 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     header: {
-        paddingVertical: 20,
+        paddingVertical: 12,
         alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        backgroundColor: '#fff',
+        elevation: 2, // Shadow for depth
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        marginTop:20
     },
     headerText: {
-        fontWeight: 'bold',
+        fontWeight: '700',
         color: '#70ac3b',
     },
     container: {
         flex: 1,
     },
     contentContainer: {
-        padding: 20,
-        paddingBottom: 40,
+        paddingHorizontal: 16,
+        paddingTop: 10,
+        paddingBottom: 30,
     },
-    input: {
-        marginBottom: 16,
-        backgroundColor: '#fff',
-    },
-    readOnlyInput: {
-        backgroundColor: '#f5f5f5',
-    },
-    dropdownWrapper: {
-        marginBottom: 20,
+    inputSection: {
         marginTop: 5,
     },
+    input: {
+        marginBottom: 10, // Reduced from 16
+        backgroundColor: '#fff',
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    readOnlyInput: {
+        backgroundColor: '#fafafa',
+        fontSize: 12, // Address thora chota dikhay
+    },
+    dropdownSection: {
+        marginBottom: 12,
+    },
+    buttonContainer: {
+        marginTop: 10,
+    },
     saveButton: {
+        borderRadius: 8,
+        backgroundColor: '#70ac3b',
+    },
+    cancelButton: {
         marginTop: 10,
         borderRadius: 8,
-        paddingVertical: 4,
+        borderColor: '#ccc', // Subdued border
     },
-    saveButtonContent: {
+    buttonHeight: {
         height: 48,
-    },
-    backButton: {
-        marginTop: 12,
     },
 });

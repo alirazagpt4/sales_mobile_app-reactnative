@@ -9,6 +9,7 @@ import {
   TextInput,
   MD3LightTheme as DefaultTheme,
 } from "react-native-paper";
+import NetInfo from "@react-native-community/netinfo";
 
 import { Platform, PermissionsAndroid } from "react-native";
 
@@ -96,7 +97,7 @@ useEffect(() => {
       (err) => {
         Alert.alert("Location Error", err.message);
       },
-      { enableHighAccuracy: true, timeout: 15000 }
+      { enableHighAccuracy: true, timeout: 30000 }
     );
   };
 
@@ -108,8 +109,10 @@ useEffect(() => {
   const handlePickImage = async () => {
     const result = await launchCamera({
       mediaType: "photo",
-      quality: 0.7,
-      saveToPhotos: true,
+      quality: 0.4,
+      maxWidth: 800,      // Image ki width limit karein taake memory crash na ho
+      maxHeight: 800,
+      saveToPhotos: false,
     });
 
     const asset: Asset | undefined =
@@ -124,70 +127,94 @@ useEffect(() => {
 
   // Submit
   const handleSubmit = async () => {
-    if (!meterReadings && !photoUri) {
-      Alert.alert(
-        "Incomplete Data",
-        "Please provide meter readings or take a photo."
-      );
-      return;
+
+
+    // 1. Pehle Internet Check karein
+    const state = await NetInfo.fetch();
+    
+    if (!state.isConnected) {
+        Alert.alert("No Internet", "Please Check Your Internet Connection!");
+        return;
+    }
+    
+    // 1. Local variable mein foran value save karein (State par depend na karein)
+    const readingsValue = meterReadings.trim();
+    const currentPhoto = photoUri;
+
+    if (!readingsValue || !currentPhoto) {
+        Alert.alert("Incomplete Data", "Please provide meter readings or take a photo.");
+        return;
     }
 
     if (!currentLocation || !locationReady) {
-      Alert.alert("Location Not Ready", "Waiting for location...");
-      return;
+        Alert.alert("Location Not Ready", "Waiting for location...");
+        return;
     }
 
     setLoading(true);
 
-    const payloadData = {
-      meterReadings: meterReadings.trim(),
-      location: {
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-        timeStamp: new Date().toISOString(),
-      },
-      photoUri,
-    };
-
-    await AsyncStorage.setItem("startDaydata", JSON.stringify(payloadData));
-
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(payloadData));
-
-    if (photoUri) {
-      const fileName = photoUri.split("/").pop() || "image.jpg";
-
-      formData.append("image", {
-        uri: photoUri,
-        name: fileName,
-        type: "image/jpeg",
-      } as any); // 👈 TypeScript fix
-    }
-
     try {
-      const response = await axios.post(API_URL, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      
-      console.log('API Response:', response.data);
-      Alert.alert("Success", "Start day saved!");
-      await AsyncStorage.removeItem("startDaydata");
-      setMeterReadings("");
-      setPhotoUri(null);
-      setCurrentLocation(null);
-      setLocationReady(false);
+        // 2. Payload banayein local variables se
+        const payloadData = {
+            photoUri: currentPhoto,
+            meterReadings: readingsValue,
+            location: {
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+                timeStamp: new Date().toISOString(),
+            },
+        };
 
-      navigation.replace("Main");
+        // Backup save karein
+         await AsyncStorage.setItem("startDaydata", JSON.stringify(payloadData));
+
+        const formData = new FormData();
+        // 🛑 Backend ke mutabiq single "data" field mein JSON bhej rahe hain
+        formData.append("data", JSON.stringify(payloadData));
+
+        if (currentPhoto) {
+            const fileName = currentPhoto.split("/").pop() || "image.jpg";
+            
+            // 🛑 Purane Androids ke liye path check
+            const cleanUri = Platform.OS === 'android' ? currentPhoto : currentPhoto.replace('file://', '');
+
+            formData.append("image", {
+                uri: cleanUri,
+                name: fileName,
+                type: "image/jpeg",
+            } as any);
+        }
+
+        const response = await axios.post(API_URL, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+            },
+            // 🛑 Purane phones slow hote hain, timeout barha den
+            timeout: 60000, 
+        });
+        
+        console.log('API Response:', response.data);
+        Alert.alert("Success", "Start day saved!");
+        
+        // Cleanup
+         await AsyncStorage.removeItem("startDaydata");
+        setMeterReadings("");
+        setPhotoUri(null);
+        setLocationReady(false);
+
+        // 🛑 Navigation se pehle thora gap den taake memory release ho jaye
+        setTimeout(() => {
+            navigation.replace("Main");
+        }, 500);
+
     } catch (error: any) {
-      console.log("Error:", error);
-      Alert.alert("Error", "Failed to submit data.");
-   } finally {
-      setLoading(false);
+        console.log("Error details:", error.response?.data || error.message);
+        Alert.alert("Error", "Failed to submit data. Please check your internet or try again.");
+    } finally {
+        setLoading(false);
     }
-  };
+};
 
   return (
     <PaperProvider theme={theme}>
