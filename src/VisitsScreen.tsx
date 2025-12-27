@@ -11,6 +11,8 @@ import {
   MD3LightTheme as DefaultTheme,
 } from "react-native-paper";
 
+// 🛑 1. Translation Import
+import { useTranslation } from 'react-i18next';
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 import { useNavigation, } from "@react-navigation/native";
@@ -39,6 +41,9 @@ export default function VisitsScreen() {
   const [loadingExisting, setLoadingExisting] = useState<boolean>(false);
   const [loadingNew, setLoadingNew] = useState<boolean>(false);
 
+// 🛑 2. Hook Initialize karein
+  const { t } = useTranslation();
+
   // Jab Existing User button press ho
   const handleExistingUserVisit = () => {
     setLoadingExisting(true);
@@ -61,7 +66,7 @@ export default function VisitsScreen() {
     <PaperProvider theme={theme}>
       <View style={styles.container}>
         <Text variant="headlineMedium" style={styles.headerText}>
-          Select Customer
+          {t('select_customer')}
         </Text>
 
         {/* Existing User Button */}
@@ -72,7 +77,7 @@ export default function VisitsScreen() {
         >
           <Ionicons name="people-circle-outline" size={30} color="#70ac3b" />
           <Text style={[styles.buttonText, { color: '#70ac3b' }]}>
-            Existing Customer
+            {t('existing_customer')}
           </Text>
         </TouchableOpacity>
 
@@ -88,7 +93,7 @@ export default function VisitsScreen() {
           <Ionicons name="person-add-outline" size={30} color="#70ac3b" />
           {/* Text color green set kiya gaya */}
           <Text style={[styles.buttonText, { color: '#70ac3b' }]}>
-            New Customer
+            {t('new_customer')}
           </Text>
         </TouchableOpacity>
 
@@ -97,7 +102,7 @@ export default function VisitsScreen() {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          Go Back
+          {t('go_back')}
         </Button>
 
       </View>

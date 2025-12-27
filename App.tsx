@@ -7,6 +7,7 @@ import React from 'react';
 import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import './src/i18n';
 
 // 🛑 1. AuthProvider import karein
 import { AuthProvider } from './src/context/AuthContext';
@@ -19,6 +20,7 @@ import StartDayScreen from './src/StartDayScreen';
 import VisitsScreen from './src/VisitsScreen';
 import AddNewCustomerScreen from './src/AddNewCustomerScreen';
 import CustomerListScreen from './src/CustomersListScreen';
+import { useTranslation } from 'react-i18next';
 
 // 1. Stack Navigator aur Routes define karein
 const Stack = createNativeStackNavigator();
@@ -33,7 +35,7 @@ type RootStackParamList = {
 // Original App function ka naam 'RootNavigation' rakh dete hain
 function RootNavigation(): React.JSX.Element {
   const { token } = useAuth();
-
+const { t } = useTranslation();
   return (
     // 2. NavigationContainer: Saare navigation ko handle karta hai
     <NavigationContainer>
@@ -72,7 +74,7 @@ function RootNavigation(): React.JSX.Element {
         component={StartDayScreen}
         options={{ 
           headerShown: true, // Is screen par header title dikhana better hoga
-          title: 'Start Day Check-in' 
+          title: t('start_day_header') 
         }
       }/>
           <Stack.Screen
@@ -80,7 +82,7 @@ function RootNavigation(): React.JSX.Element {
           component={VisitsScreen}
           options={{ 
             headerShown: true, 
-            title: 'Mark Visit' 
+            title: t('mark_visit_header') 
           }}
           
           />

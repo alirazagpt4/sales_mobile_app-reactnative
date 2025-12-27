@@ -11,6 +11,9 @@ import {
 } from "react-native-paper";
 import NetInfo from "@react-native-community/netinfo";
 
+// 🛑 1. Translation Import
+import { useTranslation } from 'react-i18next';
+
 import { Platform, PermissionsAndroid } from "react-native";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -45,6 +48,9 @@ const theme = {
 export default function StartDayScreen() {
   const navigation = useNavigation<StartDayNav>();
 
+  // 🛑 2. Hook Initialization
+  const { t } = useTranslation();
+
   const [token, setToken] = useState<string | null>(null);
 
   const [meterReadings, setMeterReadings] = useState<string>("");
@@ -67,15 +73,15 @@ useEffect(() => {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
-          title: "Location Permission",
+          title: t('confirm'), // Professional Title
           message: "App needs access to your location",
-          buttonNegative: "Cancel",
+          buttonNegative: t('location_err'),
           buttonPositive: "OK",
         }
       );
 
       if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert("Permission Denied", "Location permission is required.");
+        Alert.alert(t('error'), t('location_err'));
         return;
       }
     }
@@ -94,8 +100,8 @@ useEffect(() => {
         setCurrentLocation(pos.coords);
         setLocationReady(true);
       },
-      (err) => {
-        Alert.alert("Location Error", err.message);
+      () => {
+        Alert.alert(t('error'), t('gps_error'));
       },
       { enableHighAccuracy: true, timeout: 30000 }
     );
@@ -133,7 +139,7 @@ useEffect(() => {
     const state = await NetInfo.fetch();
     
     if (!state.isConnected) {
-        Alert.alert("No Internet", "Please Check Your Internet Connection!");
+        Alert.alert(t('error'), t('no_internet'));
         return;
     }
     
@@ -142,12 +148,12 @@ useEffect(() => {
     const currentPhoto = photoUri;
 
     if (!readingsValue || !currentPhoto) {
-        Alert.alert("Incomplete Data", "Please provide meter readings or take a photo.");
+        Alert.alert(t('error'), t('incomplete_data'));
         return;
     }
 
     if (!currentLocation || !locationReady) {
-        Alert.alert("Location Not Ready", "Waiting for location...");
+        Alert.alert(t('error'), t('waiting_location'));
         return;
     }
 
@@ -195,7 +201,7 @@ useEffect(() => {
         });
         
         console.log('API Response:', response.data);
-        Alert.alert("Success", "Start day saved!");
+        Alert.alert(t('success'), t('start_day_success'));
         
         // Cleanup
          await AsyncStorage.removeItem("startDaydata");
@@ -220,7 +226,7 @@ useEffect(() => {
     <PaperProvider theme={theme}>
       <View style={styles.container}>
         <Text variant="headlineMedium" style={styles.headerText}>
-          Start Your Day
+          {t('start_day_header')}
         </Text>
 
         {/* Image Button */}
@@ -235,14 +241,14 @@ useEffect(() => {
             color={photoUri ? "#70ac3b" : "##fdc440"}
           />
           <Text style={styles.buttonText}>
-            {photoUri ? "Photo Captured" : "Take Picture"}
+            {photoUri ? t('photo_captured') : t('take_picture')}
           </Text>
         </TouchableOpacity>
 
         <Text style={styles.orText}>OR</Text>
 
         <TextInput
-          label="Enter Readings"
+          label={t('enter_readings')}
           value={meterReadings}
           onChangeText={setMeterReadings}
           mode="outlined"
@@ -260,13 +266,12 @@ useEffect(() => {
           }
           style={styles.submitButton}
         >
-          {loading ? "Capturing..." : "Save Check-in"}
+          {loading ? t('capturing') : t('save_checkin')}
         </Button>
 
         {!locationReady && (
           <Text style={styles.locationWaiting}>
-            <Ionicons name="alert-circle-outline" size={14} /> Waiting for
-            location...
+            <Ionicons name="alert-circle-outline" size={14} /> {t('waiting_location')}
           </Text>
         )}
       </View>

@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 
+// 🛑 Translation Hook Import
+import { useTranslation } from 'react-i18next';
+
 import {
     Text,
     TextInput,
@@ -54,6 +57,9 @@ export default function AddNewCustomerScreen() {
     const { token, user } = useAuth();
     const userCityId = user?.city_id ?? null;
 
+    // 🛑 Translation Initialize
+    const { t } = useTranslation();
+
     const [cityDisplayName, setCityDisplayName] = useState('Loading...');
     const [loadingCityName, setLoadingCityName] = useState(true);
     const navigation = useNavigation<AddCustomerNav>();
@@ -85,7 +91,7 @@ export default function AddNewCustomerScreen() {
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
             );
             if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                Alert.alert("Permission Denied", "Location permission is required.");
+                Alert.alert(t('error'), t('location_err'));
                 setLocationLoading(false);
                 return;
             }
@@ -122,7 +128,7 @@ export default function AddNewCustomerScreen() {
             },
             (error) => {
                 console.log(error.code, error.message);
-                Alert.alert("Location Error", error.message);
+                Alert.alert(t('error'), t('gps_error'));
                 setLocationLoading(false);
             },
             { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
@@ -163,14 +169,14 @@ export default function AddNewCustomerScreen() {
 
     const validateForm = () => {
         if (!customerName || !contact || !area || !tehsil || !customerType || !region) {
-            Alert.alert('Required Fields', 'Please fill all fields to continue.');
+            Alert.alert(t('error'), t('incomplete_data'));
             return false;
         }
 
 
         // New Check: Location capture hui ya nahi
         if (latitude === null || longitude === null) {
-            Alert.alert('Location Required', 'Please wait until customer location is captured or press refresh.');
+            Alert.alert(t('error'), t('location_required'));
             return false;
         }
 
@@ -204,7 +210,7 @@ export default function AddNewCustomerScreen() {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            Alert.alert('Success', 'Customer added successfully!');
+            Alert.alert(t('success'), t('save_customer'));
 
             setArea('');
             setBagsPotential('');
@@ -236,7 +242,7 @@ export default function AddNewCustomerScreen() {
                 {/* Header Section - Thora compact */}
                 <View style={styles.header}>
                     <Text variant="titleLarge" style={styles.headerText}>
-                        Add New Customer
+                        {t('add_cust_header')}
                     </Text>
                 </View>
 
@@ -249,7 +255,7 @@ export default function AddNewCustomerScreen() {
                     {/* Compact Dropdown Wrapper */}
                     <View style={styles.dropdownSection}>
                         <Dropdown
-                            label="Customer Type"
+                            label={t('cust_type')}
                             value={customerType}
                             onSelect={setCustomerType}
                             options={[
@@ -263,7 +269,7 @@ export default function AddNewCustomerScreen() {
                     {/* Inputs - Thora Margin kam kiya hai */}
                     <View style={styles.inputSection}>
                         <TextInput
-                            label="Customer Name"
+                            label={t('cust_name')}
                             value={customerName}
                             onChangeText={setCustomerName}
                             mode="outlined"
@@ -274,7 +280,7 @@ export default function AddNewCustomerScreen() {
                         />
 
                         <TextInput
-                            label="Contact (11 Digits)"
+                            label={t('contact')}
                             value={contact}
                             onChangeText={setContact}
                             mode="outlined"
@@ -286,7 +292,7 @@ export default function AddNewCustomerScreen() {
                         />
 
                         <TextInput
-                            label="Area / Village"
+                            label={t('area_village')}
                             value={area}
                             onChangeText={setArea}
                             mode="outlined"
@@ -297,7 +303,7 @@ export default function AddNewCustomerScreen() {
 
                         <View style={styles.row}>
                             <TextInput
-                                label="Tehsil"
+                                label={t('tehsil')}
                                 value={tehsil}
                                 onChangeText={setTehsil}
                                 mode="outlined"
@@ -305,7 +311,7 @@ export default function AddNewCustomerScreen() {
                                 style={[styles.input, { flex: 1, marginRight: 8 }]}
                             />
                              <TextInput
-                                label="Bags"
+                                label={t('bags_potential')}
                                 value={bagsPotential}
                                 onChangeText={setBagsPotential}
                                 mode="outlined"
@@ -316,7 +322,7 @@ export default function AddNewCustomerScreen() {
                         </View>
 
                         <TextInput
-                            label="City (Auto)"
+                            label={t('city_auto')}
                             value={loadingCityName ? 'Fetching...' : cityDisplayName}
                             mode="outlined"
                             dense
@@ -326,7 +332,7 @@ export default function AddNewCustomerScreen() {
                         />
 
                         <TextInput
-                            label="Location Info"
+                            label={t('location_info')}
                             value={locationLoading ? 'Fetching GPS...' : (address ? address : 'No GPS Fix')}
                             mode="outlined"
                             dense
@@ -339,7 +345,7 @@ export default function AddNewCustomerScreen() {
 
                         <View style={styles.dropdownSection}>
                             <Dropdown
-                                label="Region"
+                                label={t('region')}
                                 value={region}
                                 onSelect={setRegion}
                                 options={[
@@ -364,7 +370,7 @@ export default function AddNewCustomerScreen() {
                             disabled={loading}
                             contentStyle={styles.buttonHeight}
                         >
-                            {loading ? 'Processing...' : 'Save Customer'}
+                            {loading ? t('saving') : t('save_customer')}
                         </Button>
 
                         <Button
@@ -374,7 +380,7 @@ export default function AddNewCustomerScreen() {
                             textColor="#666"
                             contentStyle={styles.buttonHeight}
                         >
-                            Cancel
+                            {t('cancel')}
                         </Button>
                     </View>
                 </ScrollView>

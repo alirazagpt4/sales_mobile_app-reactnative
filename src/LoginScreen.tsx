@@ -7,8 +7,10 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  TouchableOpacity
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -44,7 +46,7 @@ const theme = {
 export default function LoginScreen() {
   const { login } = useAuth();
   const navigation = useNavigation<LoginNavigationProp>();
-
+  const { t, i18n } = useTranslation();
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -85,6 +87,17 @@ export default function LoginScreen() {
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
+
+          <TouchableOpacity
+            onPress={() => i18n.changeLanguage(i18n.language === 'en' ? 'ur' : 'en')}
+            style={{ alignSelf: 'flex-end', padding: 10 }}
+          >
+            <Text style={{ color: '#70ac3b', fontSize: 22, fontWeight: 'bold',  }}>
+              {i18n.language === 'en' ? 'اردو' : 'English'}
+            </Text>
+          </TouchableOpacity>
+
+
           <Image
             source={logo}
             style={styles.logo}
@@ -93,11 +106,11 @@ export default function LoginScreen() {
 
           {/* Variant 'headlineSmall' use kiya hai taake size chota ho jaye */}
           <Text variant="headlineSmall" style={styles.headerText}>
-            Login
+            {t('login')}
           </Text>
 
           <TextInput
-            label="Name"
+            label={t('name')}
             value={name}
             onChangeText={setName}
             mode="outlined"
@@ -109,7 +122,7 @@ export default function LoginScreen() {
           />
 
           <TextInput
-            label="Password"
+            label={t('password')}
             value={password}
             onChangeText={setPassword}
             mode="outlined"
@@ -135,7 +148,7 @@ export default function LoginScreen() {
             style={styles.button}
             contentStyle={styles.buttonContent}
           >
-            Login
+            {t('login')}
           </Button>
         </ScrollView>
       </KeyboardAvoidingView>

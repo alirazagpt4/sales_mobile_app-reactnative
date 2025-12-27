@@ -16,6 +16,9 @@ import axios from 'axios';
 import { useAuth } from './context/AuthContext';
 import Geolocation from 'react-native-geolocation-service';
 
+// 🛑 1. Translation Import
+import { useTranslation } from 'react-i18next';
+
 // ✅ Working Icon Library
 import Feather from 'react-native-vector-icons/Feather';
 
@@ -32,6 +35,11 @@ const theme = {
 
 export default function CustomerListScreen() {
     const { token } = useAuth();
+
+    // 🛑 2. Hook Initialize
+    const { t } = useTranslation();
+
+
     const [customers, setCustomers] = useState([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(false);
@@ -156,7 +164,7 @@ export default function CustomerListScreen() {
 
         const hasPermission = await requestLocationPermission();
         if (!hasPermission) {
-            Alert.alert("Permission Denied", "Location permission is required.");
+            Alert.alert(t('error'), t('location_err'));
             return;
         }
 
@@ -173,7 +181,7 @@ export default function CustomerListScreen() {
                         longitude,
                         purpose: selectedPurpose, // 🛑 Payload mein selected value (New/Old/Mature) ja rahi hai
                         date: new Date().toISOString().split("T")[0],
-                        remarks: `Visit logged from mobile app as ${selectedPurpose}.`,
+                        remarks: `${t('success')}, ${t('mark_visit')} ${selectedPurpose}.`,
                     };
 
 
@@ -190,7 +198,7 @@ export default function CustomerListScreen() {
                     setVisitStatus(updatedFlags);
                     await AsyncStorage.setItem("@VisitFlags", JSON.stringify(updatedFlags));
                 } catch (apiError) {
-                    Alert.alert("Error", "Server error marking visit.");
+                    Alert.alert(t('error'), t('error'));
                 } finally {
                     setVisitLoading(false);
                     setActiveCustomerId(null);
@@ -229,27 +237,27 @@ export default function CustomerListScreen() {
                         onDismiss={() => setIsModalVisible(false)}
                         contentContainerStyle={styles.modalContent}
                     >
-                        <Text style={styles.modalTitle}>Select Visit Purpose</Text>
+                        <Text style={styles.modalTitle}>{t('select_purpose')}</Text>
 
                         {/* 🛑 Radio Button Group Logic */}
                         <RadioButton.Group onValueChange={newValue => setSelectedPurpose(newValue)} value={selectedPurpose}>
                             <View style={styles.radioRow}>
                                 <RadioButton value="New" color={theme.colors.primary} />
-                                <Text>New (Fresh Prospect)</Text>
+                                <Text>{t('purpose_new')}</Text>
                             </View>
                             <View style={styles.radioRow}>
                                 <RadioButton value="Old" color={theme.colors.primary} />
-                                <Text>Old (Follow-up)</Text>
+                                <Text>{t('purpose_old')}</Text>
                             </View>
                             <View style={styles.radioRow}>
                                 <RadioButton value="Mature" color={theme.colors.primary} />
-                                <Text>Mature (Order Taken)</Text>
+                                <Text>{t('purpose_mature')}</Text>
                             </View>
                         </RadioButton.Group>
 
                         <View style={styles.modalActions}>
-                            <PaperButton onPress={() => setIsModalVisible(false)}>Cancel</PaperButton>
-                            <PaperButton mode="contained" onPress={confirmAndMarkVisit}>Confirm</PaperButton>
+                            <PaperButton onPress={() => setIsModalVisible(false)}>{t('cancel')}</PaperButton>
+                            <PaperButton mode="contained" onPress={confirmAndMarkVisit}>{t('confirm')}</PaperButton>
                         </View>
                     </Modal>
                 </Portal>
@@ -258,13 +266,13 @@ export default function CustomerListScreen() {
                     {/* Header Title with proper top margin */}
                     <View style={styles.headerContainer}>
                         <Text variant="headlineSmall" style={styles.headerText}>
-                            Customer List
+                            {t('cust_list_header')}
                         </Text>
                     </View>
 
                     {/* Search Box with Feather Icon */}
                     <TextInput
-                        placeholder="Search by name..."
+                        placeholder={t('search_placeholder')}
                         value={search}
                         onChangeText={setSearch}
                         mode="outlined"
@@ -314,7 +322,7 @@ export default function CustomerListScreen() {
                                         disabled={visitLoading || isVisitedRecently(item.id)}
                                     >
                                         <Text style={styles.visitBtnText}>
-                                            {isVisitedRecently(item.id) ? "✅ Visited Today" : "Mark Visit"}
+                                            {isVisitedRecently(item.id) ? t('visited_today') : t('mark_visit')}
                                         </Text>
                                     </TouchableOpacity>
                                 </View>

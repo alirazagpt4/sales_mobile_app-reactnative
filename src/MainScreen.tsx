@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'; 
 // 🚨 CHANGE: @expo/vector-icons ki jagah 'react-native-vector-icons/Ionicons' use kiya
 import Ionicons from 'react-native-vector-icons/Ionicons'; 
+import { useTranslation } from 'react-i18next';
 
 import { Button, Text, Provider as PaperProvider, MD3LightTheme as DefaultTheme } from "react-native-paper";
 
@@ -64,19 +65,22 @@ export default function MainScreen() {
   // 🛑 useNavigation hook for CLI project
   const navigation = useNavigation<MainScreenNavigationProp>(); 
   const { logout } = useAuth();
+
+  // hook intialization
+  const { t } = useTranslation();
   
  const handleLogout = () => {
     Alert.alert(
-      "Logout Confirmation", // Professional Title
-      "Are you sure you want to log out?", // Professional Message
+      t('confirm'), // Professional Title
+      t('logout_message'), // Professional Message
       [
         {
-          text: "Cancel",
+          text: t('cancel'),
           onPress: () => console.log("Logout Cancelled"),
           style: "cancel"
         },
         { 
-          text: "Logout", 
+          text: t('logout_btn'), 
           onPress: async () => {
             await logout();
             navigation.replace('Login'); 
@@ -94,19 +98,19 @@ export default function MainScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <Text variant="headlineLarge" style={styles.headerText}>
-            Welcome Back!
+           {t('welcome_back')}
           </Text>
 
           {/* Tiles Section */}
           <View style={styles.dashboardGrid}>
             <DashboardItem 
               icon="sunny-outline" 
-              label="Start Day" 
+              label={t('start_day')} 
               onPress={() => navigation.navigate('StartDay')} 
             />
             <DashboardItem 
               icon="location-outline" 
-              label="Visits" 
+              label={t('visits')} 
               onPress={() => navigation.navigate('Visits')} 
             />
           </View>
@@ -127,7 +131,7 @@ export default function MainScreen() {
               <Ionicons name="log-out-outline" size={size} color={color} />
             )}
           >
-            Logout
+            {t('logout_btn')}
           </Button>
         </View>
       </View>
