@@ -399,11 +399,16 @@ export default function AddNewCustomerScreen() {
                                 value={region}
                                 onSelect={setRegion}
                                 options={[
-                                    { label: 'Region 1', value: 'Region 1' },
-                                    { label: 'Region 2', value: 'Region 2' },
-                                    { label: 'Region 3', value: 'Region 3' },
-                                    { label: 'Region 4', value: 'Region 4' },
-                                    { label: 'Region 5', value: 'Region 5' },
+                                    { label: 'Gojra', value: 'Gojra' },
+                                    { label: 'Sargodha', value: 'Sargodha' },
+                                    { label: 'Jhang', value: 'Jhang' },
+                                    { label: 'South', value: 'South' },
+                                    { label: 'Rahim Yar Khan', value: 'Rahim Yar Khan' },
+                                    { label: 'Layyah', value: 'Layyah' },
+                                    { label: 'Sahiwal', value: 'Sahiwal' },
+                                    { label: 'Narowal', value: 'Narowal' },
+                                    { label: 'Pindi Bhattian', value: 'Pindi Bhattian' },
+                                    { label: 'Gujranwala', value: 'Gujranwala' },
                                 ]}
                                 mode="outlined"
                             />
@@ -462,7 +467,7 @@ const styles = StyleSheet.create({
         color: '#70ac3b',
         flex: 1, // Text ko center karne ke liye help karega
         textAlign: 'center'
-    }, 
+    },
     backButton: {
         padding: 5,
     },
