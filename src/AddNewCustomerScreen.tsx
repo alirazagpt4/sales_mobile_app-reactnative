@@ -7,7 +7,8 @@ import {
     Platform,
     SafeAreaView,
     StatusBar,
-    PermissionsAndroid
+    PermissionsAndroid,
+    TouchableOpacity
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 
@@ -22,6 +23,7 @@ import {
     MD3LightTheme as DefaultTheme,
     ActivityIndicator
 } from 'react-native-paper';
+
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Dropdown } from 'react-native-paper-dropdown';
@@ -71,6 +73,9 @@ export default function AddNewCustomerScreen() {
     const [tehsil, setTehsil] = useState('');
     const [bagsPotential, setBagsPotential] = useState('');
     const [customerType, setCustomerType] = useState<string | undefined>(undefined);
+    const [district, setDistrict] = useState('');
+    const [division, setDivision] = useState('');
+    const [province, setProvince] = useState('');
     const [region, setRegion] = useState<string | undefined>(undefined);
     const [loading, setLoading] = useState(false);
 
@@ -201,6 +206,9 @@ export default function AddNewCustomerScreen() {
                 bags_potential: parseInt(bagsPotential) || 0,
                 type: customerType,
                 city_id: userCityId,
+                district: district,
+                division: division,
+                province: province,
                 region: region,
                 latitude: latitude,
                 longitude: longitude,
@@ -221,6 +229,9 @@ export default function AddNewCustomerScreen() {
             setLatitude(null); // Clear lat
             setLongitude(null); // Clear long
             getLocation(); // Re-fetch location
+            setDistrict('');
+            setDivision('');
+            setProvince('');
             setRegion(undefined)
 
             setTimeout(() => {
@@ -241,6 +252,12 @@ export default function AddNewCustomerScreen() {
 
                 {/* Header Section - Thora compact */}
                 <View style={styles.header}>
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                        style={styles.backButton}
+                    >
+                        <Feather name="arrow-left" size={24} color="#70ac3b" />
+                    </TouchableOpacity>
                     <Text variant="titleLarge" style={styles.headerText}>
                         {t('add_cust_header')}
                     </Text>
@@ -292,7 +309,7 @@ export default function AddNewCustomerScreen() {
                         />
 
                         <TextInput
-                            label={t('area_village')}
+                            label={t('address')}
                             value={area}
                             onChangeText={setArea}
                             mode="outlined"
@@ -310,13 +327,44 @@ export default function AddNewCustomerScreen() {
                                 dense
                                 style={[styles.input, { flex: 1, marginRight: 8 }]}
                             />
-                             <TextInput
+                            <TextInput
                                 label={t('bags_potential')}
                                 value={bagsPotential}
                                 onChangeText={setBagsPotential}
                                 mode="outlined"
                                 dense
                                 keyboardType="numeric"
+                                style={[styles.input, { flex: 1 }]}
+                            />
+                        </View>
+                        {/* ✅ Naya Section: District aur Division ek row mein */}
+                        <View style={styles.row}>
+                            <TextInput
+                                label={t('district')} // Make sure ye key i18n mein ho, warna "District" likh dein
+                                value={district}
+                                onChangeText={setDistrict}
+                                mode="outlined"
+                                dense
+                                style={[styles.input, { flex: 1, marginRight: 8 }]}
+                            />
+                            <TextInput
+                                label={t('division')}
+                                value={division}
+                                onChangeText={setDivision}
+                                mode="outlined"
+                                dense
+                                style={[styles.input, { flex: 1 }]}
+                            />
+                        </View>
+
+                        {/* ✅ Naya Section: Province single ya Region ke saath row mein */}
+                        <View style={styles.row}>
+                            <TextInput
+                                label={t('province')}
+                                value={province}
+                                onChangeText={setProvince}
+                                mode="outlined"
+                                dense
                                 style={[styles.input, { flex: 1 }]}
                             />
                         </View>
@@ -340,8 +388,10 @@ export default function AddNewCustomerScreen() {
                             multiline={false}
                             style={[styles.input, styles.readOnlyInput]}
                             left={<TextInput.Icon icon={() => <Feather name="map-pin" size={18} color="#70ac3b" />} />}
-                            right={<TextInput.Icon icon="refresh" onPress={getLocation} color="#70ac3b" size={20}/>}
+                            right={<TextInput.Icon icon="refresh" onPress={getLocation} color="#70ac3b" size={20} />}
                         />
+
+
 
                         <View style={styles.dropdownSection}>
                             <Dropdown
@@ -395,6 +445,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     header: {
+        flexDirection: 'row',
         paddingVertical: 12,
         alignItems: 'center',
         backgroundColor: '#fff',
@@ -403,11 +454,17 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
-        marginTop:20
+        marginTop: 20,
+        justifyContent: 'space-between',
     },
     headerText: {
         fontWeight: '700',
         color: '#70ac3b',
+        flex: 1, // Text ko center karne ke liye help karega
+        textAlign: 'center'
+    }, 
+    backButton: {
+        padding: 5,
     },
     container: {
         flex: 1,

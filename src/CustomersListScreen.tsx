@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useAuth } from './context/AuthContext';
 import Geolocation from 'react-native-geolocation-service';
+import { useNavigation } from '@react-navigation/native';
 
 // 🛑 1. Translation Import
 import { useTranslation } from 'react-i18next';
@@ -35,7 +36,7 @@ const theme = {
 
 export default function CustomerListScreen() {
     const { token } = useAuth();
-
+    const navigation = useNavigation();
     // 🛑 2. Hook Initialize
     const { t } = useTranslation();
 
@@ -185,7 +186,7 @@ export default function CustomerListScreen() {
                     };
 
 
-                    console.log("payload ........ " , payload)
+                    console.log("payload ........ ", payload)
 
                     await axios.post(
                         `${BASE_URL}/api/visits/create-visit`,
@@ -265,6 +266,12 @@ export default function CustomerListScreen() {
                 <View style={styles.container}>
                     {/* Header Title with proper top margin */}
                     <View style={styles.headerContainer}>
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={styles.backButton}
+                        >
+                            <Feather name="arrow-left" size={24} color="#70ac3b" />
+                        </TouchableOpacity>
                         <Text variant="headlineSmall" style={styles.headerText}>
                             {t('cust_list_header')}
                         </Text>
@@ -436,8 +443,11 @@ export default function CustomerListScreen() {
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: '#f4f4f4' },
     container: { flex: 1, paddingHorizontal: 16 },
-    headerContainer: { paddingVertical: 15, marginTop: Platform.OS === 'android' ? 10 : 0, alignItems: 'center' },
-    headerText: { fontWeight: 'bold', color: '#70ac3b' },
+    headerContainer: {flexDirection: 'row', paddingVertical: 15, marginTop: Platform.OS === 'android' ? 10 : 0, alignItems: 'center', justifyContent: 'space-between', },
+    headerText: { fontWeight: 'bold', color: '#70ac3b' , flex:1, textAlign: 'center', marginRight: 24 },
+    backButton: {
+        padding: 5,
+    },
     searchBox: { marginBottom: 10, backgroundColor: '#fff', height: 50 },
     listContent: { paddingTop: 10, paddingBottom: 30 },
     card: { backgroundColor: "#fff", padding: 16, borderRadius: 12, marginBottom: 12, elevation: 2 },
