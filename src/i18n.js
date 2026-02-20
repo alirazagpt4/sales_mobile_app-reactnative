@@ -100,6 +100,13 @@ i18n
           gps_error: "GPS signal slow or off.",
         },
 
+        // reports
+        reports: "Reports",
+        DailyVisitReport: "Daily Visit Report",
+        FromDate: "From Date",
+        ToDate: "To Date",
+        FullName: "Full Name",
+        GenerateReport: "Generate Report"
 
       },
       ur: {
@@ -172,6 +179,14 @@ i18n
           error: "غلطی",
           location_err: "لوکیشن کی اجازت ضروری ہے۔",
           gps_error: "GPS سگنل کمزور یا بند ہے۔",
+
+          // reports
+          reports: "رپورٹس",
+          DailyVisitReport: "روزانہ وزٹ رپورٹ",
+          FromDate: "تاریخ سے",
+          ToDate: "تاریخ تک",
+          FullName: "پورا نام",
+          GenerateReport: "رپورٹ بنائیں"
         },
       },
     },

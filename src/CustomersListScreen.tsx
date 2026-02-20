@@ -80,10 +80,10 @@ export default function CustomerListScreen() {
     const fetchCustomers = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`${BASE_URL}/api/customers/by-city`, {
+            const response = await axios.get(`${BASE_URL}/api/customers/team-customers`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setCustomers(response.data.customers);
+            setCustomers(response.data);
         } catch (error) {
             Alert.alert("Error", "Failed to load customer list.");
         } finally {
@@ -214,11 +214,17 @@ export default function CustomerListScreen() {
     };
 
     const isVisitedRecently = (customer_id: number) => {
-        const lastTime = visitStatus[customer_id];
-        if (!lastTime) return false;
-        const hoursPassed = (Date.now() - lastTime) / (1000 * 60 * 60);
-        return hoursPassed < 24;
-    };
+    const lastTime = visitStatus[customer_id];
+    if (!lastTime) return false;
+
+    // 1. Aaj ki raat (12:00 AM) ka time nikalna
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0); 
+
+    // 2. Check: Kya visit aaj ki raat 12 baje ke baad hui hai?
+    // Agar visit kal raat 11:59 par bhi hui hogi, tab bhi ye aaj 12:00 AM par reset ho jayega.
+    return lastTime >= startOfToday.getTime();
+};
 
     const filteredCustomers = customers.filter((item: any) =>
         item.customer_name.toLowerCase().includes(search.toLowerCase())

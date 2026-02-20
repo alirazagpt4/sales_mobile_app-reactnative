@@ -214,6 +214,8 @@ export default function AddNewCustomerScreen() {
                 longitude: longitude,
             };
 
+
+
             await axios.post(`${API_URL}/api/customers/create-customer`, payload, {
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -409,6 +411,11 @@ export default function AddNewCustomerScreen() {
                                     { label: 'Narowal', value: 'Narowal' },
                                     { label: 'Pindi Bhattian', value: 'Pindi Bhattian' },
                                     { label: 'Gujranwala', value: 'Gujranwala' },
+                                    { label: 'Multan', value: 'Multan' },
+                                    { label: 'Bahawalpur', value: 'Bahawalpur' },
+                                    { label: 'Khanewal', value: 'Khanewal' },
+                                    { label: 'Jaranwala', value: 'Jaranwala' },
+                                    { label: 'Rawalpindi', value: 'Rawalpindi' },
                                 ]}
                                 mode="outlined"
                             />

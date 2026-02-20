@@ -20,6 +20,8 @@ import StartDayScreen from './src/StartDayScreen';
 import VisitsScreen from './src/VisitsScreen';
 import AddNewCustomerScreen from './src/AddNewCustomerScreen';
 import CustomerListScreen from './src/CustomersListScreen';
+import ReportScreen from './src/ReportScreen';
+import DailyVisitReportScreen from './src/DailyVisitReportScreen';
 import { useTranslation } from 'react-i18next';
 
 // 1. Stack Navigator aur Routes define karein
@@ -96,6 +98,16 @@ const { t } = useTranslation();
                 name="CustomerList" 
                 component={CustomerListScreen} 
                 options={{ title: 'Customer List' }}
+                />
+                <Stack.Screen 
+                name="Report" 
+                component={ReportScreen} 
+                options={{ title: 'Reports' }}
+                />
+                <Stack.Screen 
+                name="DailyVisitReport" 
+                component={DailyVisitReportScreen} 
+                options={{ title: 'Daily Visit Report' }}
                 />
                 </>
 

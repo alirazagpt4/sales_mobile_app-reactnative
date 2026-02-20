@@ -24,6 +24,7 @@ type RootStackParamList = {
   // Naye Routes jo tiles mein use honge
   StartDay: undefined; 
   Visits: undefined;
+  Report: undefined;
 };
 type MainScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 // ---------------------------------
@@ -113,6 +114,18 @@ export default function MainScreen() {
               label={t('visits')} 
               onPress={() => navigation.navigate('Visits')} 
             />
+
+          </View>
+
+          {/* 🆕 Row 2: Reports Section (Same tiles style) */}
+          <View style={styles.dashboardGrid}>
+            <DashboardItem 
+              icon="document-text-outline" 
+              label={t('reports') || "Reports"} 
+              onPress={() => navigation.navigate('Report')} 
+            />
+            {/* Ye empty View isliye taake "Reports" wala box left side par alignment mein rahe */}
+            <View style={{ width: '45%', backgroundColor: 'transparent' }} />
           </View>
           
           <View style={styles.filler} />
