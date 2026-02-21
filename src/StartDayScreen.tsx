@@ -202,6 +202,11 @@ useEffect(() => {
         
         console.log('API Response:', response.data);
         Alert.alert(t('success'), t('start_day_success'));
+
+        // ✅ START: YE DO LINES ADD KAREIN
+        const today = new Date().toLocaleDateString();
+        await AsyncStorage.setItem("last_submission_date", today);
+        // ✅ END: AB SELECTION SCREEN PAR BUTTONS DISABLE HO JAYENGE
         
         // Cleanup
          await AsyncStorage.removeItem("startDaydata");

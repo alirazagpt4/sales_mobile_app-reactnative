@@ -22,6 +22,7 @@ type RootStackParamList = {
   Login: undefined; // Target after logout
   Main: undefined;
   // Naye Routes jo tiles mein use honge
+  StartDaySelection: undefined;
   StartDay: undefined; 
   Visits: undefined;
   Report: undefined;
@@ -107,7 +108,7 @@ export default function MainScreen() {
             <DashboardItem 
               icon="sunny-outline" 
               label={t('start_day')} 
-              onPress={() => navigation.navigate('StartDay')} 
+              onPress={() => navigation.navigate('StartDaySelection')} 
             />
             <DashboardItem 
               icon="location-outline" 

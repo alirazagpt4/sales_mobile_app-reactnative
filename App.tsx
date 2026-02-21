@@ -22,6 +22,7 @@ import AddNewCustomerScreen from './src/AddNewCustomerScreen';
 import CustomerListScreen from './src/CustomersListScreen';
 import ReportScreen from './src/ReportScreen';
 import DailyVisitReportScreen from './src/DailyVisitReportScreen';
+import StartYourSelection from './src/StartYourSeletion';
 import { useTranslation } from 'react-i18next';
 
 // 1. Stack Navigator aur Routes define karein
@@ -70,6 +71,15 @@ const { t } = useTranslation();
         <Stack.Screen 
         name="Main" 
         component={MainScreen} 
+        />
+
+        <Stack.Screen 
+            name="StartDaySelection" 
+            component={StartYourSelection} 
+            options={{ 
+                headerShown: true, 
+                title: t('attendance_selection') || "Daily Status" 
+            }} 
         />
         <Stack.Screen
         name='StartDay'

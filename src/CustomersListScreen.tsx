@@ -43,6 +43,9 @@ export default function CustomerListScreen() {
 
     const [customers, setCustomers] = useState([]);
     const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [loading, setLoading] = useState(false);
     const [visitLoading, setVisitLoading] = useState(false);
     const [visitStatus, setVisitStatus] = useState<Record<number, number>>({});
@@ -73,21 +76,50 @@ export default function CustomerListScreen() {
 
     useEffect(() => {
         if (token) {
-            fetchCustomers();
+            fetchCustomers(true);
         }
-    }, [token]);
+    }, [token, search]);
 
-    const fetchCustomers = async () => {
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            if (token) fetchCustomers(true);
+        }, 500); // 👈 Jab user 500ms tak rukega, tab search hogi
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
+
+
+    const fetchCustomers = async (isRefresh = false) => {
+        if (loading || loadingMore) return; // Dubara call na ho agar pehle se chal raha hai
+
         try {
-            setLoading(true);
+            const currentPage = isRefresh ? 1 : page;
+            if (isRefresh) setLoading(true); else setLoadingMore(true);
+
             const response = await axios.get(`${BASE_URL}/api/customers/team-customers`, {
+                params: { page: currentPage, limit: 10, search }, // Backend ko batana page konsa hai
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setCustomers(response.data);
+
+            const newData = response.data.data;
+
+            if (isRefresh) {
+                setCustomers(newData);
+                setPage(2);
+            } else {
+                setCustomers([...customers, ...newData]); // Purane customers + naye
+                setPage(page + 1);
+            }
+
+            // Agar backend se data limit se kam aaya hai, matlab aur data nahi hai
+            if (newData.length < 10) setHasMore(false); else setHasMore(true);
+
         } catch (error) {
-            Alert.alert("Error", "Failed to load customer list.");
+            Alert.alert("Error", "Failed to load customers.");
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     };
 
@@ -214,17 +246,17 @@ export default function CustomerListScreen() {
     };
 
     const isVisitedRecently = (customer_id: number) => {
-    const lastTime = visitStatus[customer_id];
-    if (!lastTime) return false;
+        const lastTime = visitStatus[customer_id];
+        if (!lastTime) return false;
 
-    // 1. Aaj ki raat (12:00 AM) ka time nikalna
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0); 
+        // 1. Aaj ki raat (12:00 AM) ka time nikalna
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
 
-    // 2. Check: Kya visit aaj ki raat 12 baje ke baad hui hai?
-    // Agar visit kal raat 11:59 par bhi hui hogi, tab bhi ye aaj 12:00 AM par reset ho jayega.
-    return lastTime >= startOfToday.getTime();
-};
+        // 2. Check: Kya visit aaj ki raat 12 baje ke baad hui hai?
+        // Agar visit kal raat 11:59 par bhi hui hogi, tab bhi ye aaj 12:00 AM par reset ho jayega.
+        return lastTime >= startOfToday.getTime();
+    };
 
     const filteredCustomers = customers.filter((item: any) =>
         item.customer_name.toLowerCase().includes(search.toLowerCase())
@@ -300,18 +332,38 @@ export default function CustomerListScreen() {
                         <ActivityIndicator animating={true} color={theme.colors.primary} size="large" style={{ marginTop: 50 }} />
                     ) : (
                         <FlatList
-                            data={filteredCustomers}
+                            data={customers}
                             keyExtractor={(item: any) => item.id.toString()}
-                            onRefresh={fetchCustomers}
+
+                            // Refresh logic (Upar se khinchne par)
+                            onRefresh={() => fetchCustomers(true)}
                             refreshing={loading}
-                            contentContainerStyle={styles.listContent}
-                            showsVerticalScrollIndicator={false}
-                            ListEmptyComponent={<Text style={styles.emptyText}>No customers found.</Text>}
+
+                            // Pagination logic (Niche pohanchne par)
+                            onEndReached={() => {
+                                if (hasMore && !loadingMore) {
+                                    fetchCustomers();
+                                }
+                            }}
+                            onEndReachedThreshold={0.5} // Jab list 50% end par ho tabhi call kar do
+
+                            // Footer Loader (Niche chota spinner dikhane ke liye)
+                            ListFooterComponent={() => (
+                                loadingMore ? <ActivityIndicator color={theme.colors.primary} style={{ margin: 20 }} /> : null
+                            )}
                             renderItem={({ item }) => (
                                 <View style={styles.card}>
                                     <View style={styles.cardHeader}>
                                         <Text style={styles.name}>{item.customer_name}</Text>
                                         <Text style={styles.badge}>{item.type}</Text>
+                                    </View>
+
+                                    {/* 🟢 Naya Row: Kisne create kiya (Manager/Zonal Manager ke liye) */}
+                                    <View style={styles.detailRow}>
+                                        <Feather name="user" size={14} color="#70ac3b" style={{ marginRight: 5 }} />
+                                        <Text style={[styles.details, { fontWeight: '600', color: '#444' }]}>
+                                            {t('created_by')}: <Text style={{ color: '#70ac3b' }}>{item.userDetails?.fullname || "N/A"}</Text>
+                                        </Text>
                                     </View>
 
                                     <View style={styles.detailRow}>
@@ -449,8 +501,8 @@ export default function CustomerListScreen() {
 const styles = StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: '#f4f4f4' },
     container: { flex: 1, paddingHorizontal: 16 },
-    headerContainer: {flexDirection: 'row', paddingVertical: 15, marginTop: Platform.OS === 'android' ? 10 : 0, alignItems: 'center', justifyContent: 'space-between', },
-    headerText: { fontWeight: 'bold', color: '#70ac3b' , flex:1, textAlign: 'center', marginRight: 24 },
+    headerContainer: { flexDirection: 'row', paddingVertical: 15, marginTop: Platform.OS === 'android' ? 10 : 0, alignItems: 'center', justifyContent: 'space-between', },
+    headerText: { fontWeight: 'bold', color: '#70ac3b', flex: 1, textAlign: 'center', marginRight: 24 },
     backButton: {
         padding: 5,
     },
