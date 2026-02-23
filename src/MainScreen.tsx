@@ -4,7 +4,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 
 // 🛑 CLI Navigation Imports
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation  } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'; 
 // 🚨 CHANGE: @expo/vector-icons ki jagah 'react-native-vector-icons/Ionicons' use kiya
 import Ionicons from 'react-native-vector-icons/Ionicons'; 
@@ -66,7 +66,7 @@ const DashboardItem = ({ icon, label, onPress }: DashboardItemProps) => (
 export default function MainScreen() {
   // 🛑 useNavigation hook for CLI project
   const navigation = useNavigation<MainScreenNavigationProp>(); 
-  const { logout } = useAuth();
+  const { logout , user } = useAuth();
 
   // hook intialization
   const { t } = useTranslation();
@@ -98,10 +98,20 @@ export default function MainScreen() {
     <PaperProvider theme={theme}>
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Header */}
-          <Text variant="headlineLarge" style={styles.headerText}>
-           {t('welcome_back')}
-          </Text>
+          <View style={styles.profileHeader}>
+    <View style={{ flex: 1 }}>
+      <Text style={styles.welcomeSubText}>{t('welcome_back')}</Text>
+      <Text style={styles.userMainName}>{user?.fullname || 'User'}</Text>
+    </View>
+    
+    {/* Right side Menu Icon */}
+    <TouchableOpacity 
+      style={styles.headerIconCircle}
+      onPress={() => Alert.alert("Profile", `Name: ${user?.fullname}\nDesignation: ${user?.designation || 'N/A'}`)}
+    >
+      <Ionicons name="person-circle-outline" size={45} color={theme.colors.primary} />
+    </TouchableOpacity>
+  </View>
 
           {/* Tiles Section */}
           <View style={styles.dashboardGrid}>
@@ -122,7 +132,7 @@ export default function MainScreen() {
           <View style={styles.dashboardGrid}>
             <DashboardItem 
               icon="document-text-outline" 
-              label={t('reports') || "Reports"} 
+              label={t('reports')} 
               onPress={() => navigation.navigate('Report')} 
             />
             {/* Ye empty View isliye taake "Reports" wala box left side par alignment mein rahe */}
@@ -232,5 +242,29 @@ const styles = StyleSheet.create({
   buttonLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-  }
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 50,
+    marginBottom: 30,
+    paddingHorizontal: 5,
+  },
+  welcomeSubText: {
+    fontSize: 14,
+    color: '#888',
+    fontWeight: '500',
+  },
+  userMainName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: -2,
+  },
+  headerIconCircle: {
+    backgroundColor: '#f0f9eb',
+    borderRadius: 30,
+    padding: 2,
+  },
 });

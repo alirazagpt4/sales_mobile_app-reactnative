@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
-import { Text, ActivityIndicator } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,28 +14,39 @@ export default function StartYourSelection() {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string | null>(null);
-    const [isActionDone, setIsActionDone] = useState(false); // Buttons disable karne ke liye
+    const [isActionDone, setIsActionDone] = useState(false);
+    const [markedType, setMarkedType] = useState<string | null>(null);
 
-    useEffect(() => {
-        const initialize = async () => {
-            const savedToken = await AsyncStorage.getItem("token");
-            setToken(savedToken);
+    useFocusEffect(
+        React.useCallback(() => {
+            const checkStatus = async () => {
+                const savedToken = await AsyncStorage.getItem("token");
+                setToken(savedToken);
 
-            // 🛑 Check if already submitted today
-            const lastSubmissionDate = await AsyncStorage.getItem("last_submission_date");
-            const today = new Date().toLocaleDateString(); // e.g., "2/21/2026"
+                const lastDate = await AsyncStorage.getItem("last_submission_date");
+                const savedType = await AsyncStorage.getItem("submission_type");
+                const today = new Date().toLocaleDateString();
 
-            if (lastSubmissionDate === today) {
-                setIsActionDone(true);
-            }
-        };
-        initialize();
-    }, []);
+                // 🛑 Yahan check karein ke date aaj ki hai ya nahi
+                if (lastDate === today) {
+                    setIsActionDone(true);
+                    setMarkedType(savedType);
+                } else {
+                    // Agar date purani hai toh reset karein (Naye din ke liye)
+                    setIsActionDone(false);
+                    setMarkedType(null);
+                }
+            };
+            checkStatus();
+        }, [])
+    );
 
-    const markSuccessInStorage = async () => {
+    const markSuccessInStorage = async (selectedType: 'work' | 'leave') => {
         const today = new Date().toLocaleDateString();
         await AsyncStorage.setItem("last_submission_date", today);
+        await AsyncStorage.setItem("submission_type", selectedType);
         setIsActionDone(true);
+        setMarkedType(selectedType);
     };
 
     const submitLeaveAPI = async () => {
@@ -49,7 +60,7 @@ export default function StartYourSelection() {
                 headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
             });
 
-            await markSuccessInStorage(); // 🛑 Save date on success
+            await markSuccessInStorage('leave'); 
             Alert.alert(t('success'), "Leave marked for today!");
             navigation.replace("Main");
         } catch (error) {
@@ -72,7 +83,7 @@ export default function StartYourSelection() {
                 >
                     <Ionicons name="speedometer-outline" size={28} color={isActionDone ? "#999" : "#70ac3b"} style={styles.icon} />
                     <Text style={[styles.buttonText, isActionDone && styles.disabledText]}>
-                        {isActionDone ? "Already Marked" : t('start_day')}
+                        {isActionDone && markedType === 'work' ? "Already Marked" : t('start_day')}
                     </Text>
                 </TouchableOpacity>
 
@@ -86,12 +97,14 @@ export default function StartYourSelection() {
                 >
                     <Ionicons name="calendar-outline" size={28} color={isActionDone ? "#999" : "#70ac3b"} style={styles.icon} />
                     <Text style={[styles.buttonText, isActionDone && styles.disabledText]}>
-                        {isActionDone ? "Already Marked" : t('take_leave')}
+                        {isActionDone && markedType === 'leave' ? "Already Marked" : t('take_leave')}
                     </Text>
                 </TouchableOpacity>
 
                 {isActionDone && (
-                    <Text style={styles.infoText}>You have already updated your status for today.</Text>
+                    <Text style={styles.infoText}>
+                        {markedType === 'work' ? "You have started your day." : "You are on leave today."}
+                    </Text>
                 )}
 
                 <TouchableOpacity style={styles.goBack} onPress={() => navigation.goBack()}>

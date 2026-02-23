@@ -17,7 +17,9 @@ const LANGUAGE_DETECTOR = {
   cacheUserLanguage: async (lng) => {
     try {
       await AsyncStorage.setItem('user-language', lng);
-    } catch (error) {}
+    } catch (error) {
+      console.log("Language save error:", error);
+    }
   },
 };
 
@@ -30,22 +32,17 @@ i18n
     resources: {
       en: {
         translation: {
-          // LoginScreen.tsx
           login: "Login",
           name: "Name",
           password: "Password",
           logging_in: "Logging in...",
-
-          // MainScreen.tsx
           welcome_back: "Welcome Back",
           start_day: "Start Day",
           visits: "Visits",
+          reports: "Reports",
           day_started_already: "Day already started!",
           logout_message: "Are you sure you want to log out?",
           logout_btn: "Logout",
-
-
-          // StartDayScreen.tsx (🛑 Nayi Keys Yahan Hain)
           start_day_header: "Start Your Day",
           take_picture: "Take Picture",
           photo_captured: "Photo Captured",
@@ -56,15 +53,11 @@ i18n
           start_day_success: "Start day saved successfully!",
           no_internet: "No Internet Connection!",
           incomplete_data: "Please provide readings and photo.",
-
-          // VisitsScreen.tsx
-          mark_visit_header:"Mark Visit",
+          mark_visit_header: "Mark Visit",
           new_customer: "New Customer",
           existing_customer: "Existing Customer",
           select_customer: "Select Customer",
           go_back: "Go Back",
-
-          // AddNewCustomerScreen.tsx
           add_cust_header: "Add New Customer",
           cust_name: "Customer Name",
           cust_type: "Customer Type",
@@ -80,8 +73,6 @@ i18n
           region: "Region",
           saving: "Saving...",
           save_customer: "Save Customer",
-
-          // CustomerListScreen.tsx
           cust_list_header: "Customer List",
           search_placeholder: "Search by name...",
           mark_visit: "Mark Visit",
@@ -92,41 +83,33 @@ i18n
           purpose_mature: "Mature Order",
           confirm: "Confirm",
           cancel: "Cancel",
-
-          // Alerts & Messages
           success: "Success",
           error: "Error",
           location_err: "Location permission is required.",
           gps_error: "GPS signal slow or off.",
+          daily_visit_report: "Daily Visit Report",
+          from_date: "From Date",
+          to_date: "To Date",
+          full_name: "Full Name",
+          generate_report: "Generate Report",
+          select_option: "Start Your Day As",
+          take_leave: "Take Leave",
+          attendance_selection: "Daily Status",
         },
-
-        // reports
-        reports: "Reports",
-        DailyVisitReport: "Daily Visit Report",
-        FromDate: "From Date",
-        ToDate: "To Date",
-        FullName: "Full Name",
-        GenerateReport: "Generate Report"
-
       },
       ur: {
         translation: {
-          // LoginScreen.tsx
           login: "لاگ ان",
           name: "نام",
           password: "پاس ورڈ",
           logging_in: "لاگ ان ہو رہا ہے...",
-
-          // MainScreen.tsx
           welcome_back: "خوش آمدید",
           start_day: "دن شروع کریں",
           visits: "وزٹ",
+          reports: "رپورٹس",
           day_started_already: "دن پہلے ہی شروع ہو چکا ہے!",
           logout_message: "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
           logout_btn: "لاگ آؤٹ",
-
-
-          // StartDayScreen.tsx (🛑 Nayi Keys Urdu Mein)
           start_day_header: "اپنا دن شروع کریں",
           take_picture: "تصویر لیں",
           photo_captured: "تصویر لے لی گئی ہے",
@@ -137,15 +120,11 @@ i18n
           start_day_success: "آپ کا دن کامیابی سے شروع ہو گیا ہے!",
           no_internet: "انٹرنیٹ موجود نہیں ہے!",
           incomplete_data: "براہ کرم ریڈنگ اور تصویر فراہم کریں۔",
-
-          // VisitsScreen.tsx
-          mark_visit_header:"وزٹ مارک کریں",
+          mark_visit_header: "وزٹ مارک کریں",
           new_customer: "نیا گاہک",
           existing_customer: "موجودہ گاہک",
           select_customer: "گاہک منتخب کریں",
           go_back: "واپس جائیں",
-
-          // AddNewCustomerScreen.tsx
           add_cust_header: "نیا گاہک شامل کریں",
           cust_name: "گاہک کا نام",
           cust_type: "گاہک کی قسم",
@@ -154,15 +133,13 @@ i18n
           tehsil: "تحصیل",
           bags_potential: "بوریوں کی گنجائش",
           city_auto: "شہر",
-          district : "ضلع",
-          division : "ڈویژن",
-          province : "صوبہ",
-          region : "ریجن",
+          district: "ضلع",
+          division: "ڈویژن",
+          province: "صوبہ",
+          region: "ریجن",
           location_info: "لوکیشن کی معلومات",
           saving: "محفوظ ہو رہا ہے...",
           save_customer: "گاہک محفوظ کریں",
-
-          // CustomerListScreen.tsx
           cust_list_header: "گاہکوں کی فہرست",
           search_placeholder: "نام سے تلاش کریں...",
           mark_visit: "وزٹ درج کریں",
@@ -173,20 +150,18 @@ i18n
           purpose_mature: "میچور (آرڈر مل گیا)",
           confirm: "تصدیق کریں",
           cancel: "کینسل",
-
-          // Alerts & Messages
           success: "کامیابی",
           error: "غلطی",
           location_err: "لوکیشن کی اجازت ضروری ہے۔",
           gps_error: "GPS سگنل کمزور یا بند ہے۔",
-
-          // reports
-          reports: "رپورٹس",
-          DailyVisitReport: "روزانہ وزٹ رپورٹ",
-          FromDate: "تاریخ سے",
-          ToDate: "تاریخ تک",
-          FullName: "پورا نام",
-          GenerateReport: "رپورٹ بنائیں"
+          daily_visit_report: "روزانہ وزٹ رپورٹ",
+          from_date: "تاریخ سے",
+          to_date: "تاریخ تک",
+          full_name: "پورا نام",
+          generate_report: "رپورٹ بنائیں",
+          select_option: "اپنا دن شروع کرنے کا طریقہ منتخب کریں",
+          take_leave: "چھٹی لیں",
+          attendance_selection: "روزانہ حوالہ",
         },
       },
     },

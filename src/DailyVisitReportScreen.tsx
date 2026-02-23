@@ -168,56 +168,94 @@ export default function DailyVisitReportScreen() {
           {/* Results Area */}
           {loading ? (
             <ActivityIndicator size="large" color="#70ac3b" style={{ marginTop: 50 }} />
-          ) : reportData?.noData ? (
-            /* This section handles the "No Report" scenario */
+          ) : (reportData?.report?.length === 0 || !reportData) ? (
+
+            /* 🕵️‍♂️ Full Screen Empty State - Jab kuch bhi record na ho */
             <View style={styles.noDataContainer}>
-              <Ionicons name="calendar-outline" size={64} color="#ccc" />
-              <Text style={styles.noDataTitle}>No Activity Found</Text>
+              <View style={styles.emptyIconCircle}>
+                <Ionicons name="search-outline" size={70} color="#bbb" />
+                <View style={styles.emojiOverlay}>
+                  <Ionicons name="alert-circle" size={24} color="#ffa000" />
+                </View>
+              </View>
+
+              <Text style={styles.noDataTitle}>No Activity Recorded</Text>
               <Text style={styles.noDataSub}>
-                {fromDate === toDate
-                  ? `No visits recorded for ${fromDate}.`
-                  : "No visits found for the selected date range."}
+                We couldn't find any logs for <Text style={{ fontWeight: 'bold', color: '#333' }}>{selectedUser?.name || 'this user'}</Text> during this period. No attendance, leaves, or visits were found.
               </Text>
+
+              <Button
+                mode="contained"
+                onPress={() => fetchReport()}
+                style={styles.retryButton}
+                icon="refresh"
+              >
+                RETRY SEARCH
+              </Button>
             </View>
+
           ) : (
+            /* 📜 Report List (Agar data hai) */
             <ScrollView contentContainerStyle={styles.scrollArea}>
               {reportData?.report?.map((day: any, index: number) => (
                 <View key={index} style={styles.dayWrapper}>
-                  <View style={styles.mainDateHeader}>
+
+                  {/* Header Section */}
+                  <View style={[styles.mainDateHeader, day.is_leave && { borderLeftColor: '#f44336' }]}>
                     <Text style={styles.dateMainText}>{day.date}</Text>
-                    <Text style={styles.subHeaderText}>START: {day.day_start_time}  |  METER: {day.meter_reading}</Text>
+                    <Text style={styles.subHeaderText}>
+                      {day.is_leave ? (
+                        <Text style={{ color: '#f44336', fontWeight: 'bold' }}>STATUS: {day.status}</Text>
+                      ) : day.meter_reading && day.meter_reading !== "N/A" ? (
+                        `START: ${day.day_start_time}  |  METER: ${day.meter_reading}`
+                      ) : (
+                        <Text style={{ color: '#ffa000', fontWeight: 'bold' }}>⚠️ STATUS: INACTIVE / NO ENTRY</Text>
+                      )}
+                    </Text>
                   </View>
 
-                  {day.activities.map((act: any, idx: number) => (
-                    <Card key={idx} style={styles.visitCard}>
-                      <Card.Content>
-                        <View style={styles.infoGrid}>
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.fieldLabel}>CUSTOMER</Text>
-                            <Text style={styles.fieldValue}>{act.customer_name}</Text>
+                  {/* Activities Logic */}
+                  {day.activities && day.activities.length > 0 ? (
+                    day.activities.map((act: any, idx: number) => (
+                      <Card key={idx} style={styles.visitCard}>
+                        <Card.Content>
+                          <View style={styles.infoGrid}>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.fieldLabel}>CUSTOMER</Text>
+                              <Text style={styles.fieldValue}>{act.customer_name}</Text>
+                            </View>
+                            <View style={{ alignItems: 'flex-end' }}>
+                              <Text style={styles.fieldLabel}>TIME</Text>
+                              <Text style={styles.fieldValue}>{act.time}</Text>
+                            </View>
                           </View>
-                          <View style={{ alignItems: 'flex-end' }}>
-                            <Text style={styles.fieldLabel}>TIME</Text>
-                            <Text style={styles.fieldValue}>{act.time}</Text>
+
+                          <Divider style={styles.divider} />
+
+                          <View style={styles.infoGrid}>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.fieldLabel}>CITY</Text>
+                              <Text style={styles.fieldValue}>{act.city}</Text>
+                            </View>
+                            <View style={{ alignItems: 'flex-end' }}>
+                              <Text style={styles.fieldLabel}>PURPOSE</Text>
+                              <Text style={[styles.fieldValue, { color: '#70ac3b' }]}>{act.purpose}</Text>
+                            </View>
                           </View>
-                        </View>
-                        <Divider style={styles.divider} />
-                        <View style={styles.infoGrid}>
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.fieldLabel}>CITY</Text>
-                            <Text style={styles.fieldValue}>{act.city}</Text>
+
+                          <View style={styles.potentialBox}>
+                            <Text style={styles.potentialLabel}>BAGS POTENTIAL: <Text style={{ color: '#70ac3b' }}>{act.bags}</Text></Text>
                           </View>
-                          <View style={{ alignItems: 'flex-end' }}>
-                            <Text style={styles.fieldLabel}>PURPOSE</Text>
-                            <Text style={[styles.fieldValue, { color: '#70ac3b' }]}>{act.purpose}</Text>
-                          </View>
-                        </View>
-                        <View style={styles.potentialBox}>
-                          <Text style={styles.potentialLabel}>BAGS POTENTIAL: <Text style={{ color: '#70ac3b' }}>{act.bags}</Text></Text>
-                        </View>
-                      </Card.Content>
-                    </Card>
-                  ))}
+                        </Card.Content>
+                      </Card>
+                    ))
+                  ) : (
+                    /* Small box if day exists but no visits */
+                    <View style={styles.noActivitySmall}>
+                      <Ionicons name="information-circle-outline" size={16} color="#aaa" style={{ marginRight: 5 }} />
+                      <Text style={styles.noActivityText}>No field visits reported for this date.</Text>
+                    </View>
+                  )}
                 </View>
               ))}
             </ScrollView>
@@ -287,6 +325,38 @@ const styles = StyleSheet.create({
   memberText: { fontSize: 16, color: '#444' },
   noDataContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
   noDataTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 10 },
-  noDataSub: { fontSize: 14, color: '#777', textAlign: 'center' }
+  noDataSub: { fontSize: 14, color: '#777', textAlign: 'center' },
+  emptyIconCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  emojiOverlay: {
+    position: 'absolute',
+    bottom: 5,
+    right: 5,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 4,
+    elevation: 5
+  },
+  noActivitySmall: {
+    backgroundColor: '#fcfcfc',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderStyle: 'dashed',
+    alignItems: 'center'
+  },
+  noActivityText: {
+    color: '#aaa',
+    fontSize: 13,
+    fontStyle: 'italic'
+  }
 
 });
