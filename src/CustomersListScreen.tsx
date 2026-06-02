@@ -280,6 +280,12 @@ export default function CustomerListScreen() {
 
                         {/* 🛑 Radio Button Group Logic */}
                         <RadioButton.Group onValueChange={newValue => setSelectedPurpose(newValue)} value={selectedPurpose}>
+                            
+                             <View style={styles.radioRow}>
+                                <RadioButton value="NewPotentialCustomer" color={theme.colors.primary} />
+                                <Text>{t('purpose_new_potential_customer')}</Text>
+                            </View>
+
                             <View style={styles.radioRow}>
                                 <RadioButton value="New" color={theme.colors.primary} />
                                 <Text>{t('purpose_new')}</Text>
@@ -399,102 +405,6 @@ export default function CustomerListScreen() {
         </PaperProvider>
     );
 }
-
-// const styles = StyleSheet.create({
-//     safeArea: {
-//         flex: 1,
-//         backgroundColor: '#f4f4f4',
-//     },
-//     container: {
-//         flex: 1,
-//         paddingHorizontal: 16,
-//     },
-//     headerContainer: {
-//         paddingVertical: 15,
-//         marginTop: Platform.OS === 'android' ? 10 : 0,
-//         alignItems: 'center',
-//     },
-//     headerText: {
-//         fontWeight: 'bold',
-//         color: '#70ac3b',
-//         letterSpacing: 0.5,
-//     },
-//     searchBox: {
-//         marginBottom: 10,
-//         backgroundColor: '#fff',
-//         height: 50,
-//     },
-//     listContent: {
-//         paddingTop: 10,
-//         paddingBottom: 30,
-//     },
-//     card: {
-//         backgroundColor: "#fff",
-//         padding: 16,
-//         borderRadius: 12,
-//         marginBottom: 12,
-//         elevation: 2,
-//         shadowColor: "#000",
-//         shadowOffset: { width: 0, height: 1 },
-//         shadowOpacity: 0.1,
-//         shadowRadius: 3,
-//     },
-//     cardHeader: {
-//         flexDirection: 'row',
-//         justifyContent: 'space-between',
-//         alignItems: 'flex-start',
-//         marginBottom: 8,
-//     },
-//     name: {
-//         fontSize: 17,
-//         fontWeight: 'bold',
-//         color: '#222',
-//         flex: 1,
-//     },
-//     badge: {
-//         backgroundColor: '#f0f0f0',
-//         paddingHorizontal: 8,
-//         paddingVertical: 2,
-//         borderRadius: 4,
-//         fontSize: 11,
-//         color: '#70ac3b',
-//         fontWeight: 'bold',
-//         overflow: 'hidden',
-//     },
-//     detailRow: {
-//         flexDirection: 'row',
-//         alignItems: 'center',
-//         marginBottom: 4,
-//     },
-//     details: {
-//         color: "#555",
-//         fontSize: 14,
-//     },
-//     visitBtn: {
-//         paddingVertical: 12,
-//         borderRadius: 8,
-//         marginTop: 12,
-//         alignItems: 'center',
-//         flexDirection: 'row',
-//         justifyContent: 'center',
-//     },
-//     btnVisit: {
-//         backgroundColor: "#4072fdff",
-//     },
-//     btnVisited: {
-//         backgroundColor: "#28a745",
-//     },
-//     visitBtnText: {
-//         color: "#fff",
-//         fontWeight: "bold",
-//         fontSize: 15,
-//     },
-//     emptyText: {
-//         textAlign: 'center',
-//         marginTop: 30,
-//         color: '#999',
-//     }
-// });
 
 
 

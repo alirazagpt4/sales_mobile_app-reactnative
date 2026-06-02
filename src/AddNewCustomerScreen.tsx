@@ -416,6 +416,10 @@ export default function AddNewCustomerScreen() {
                                     { label: 'Khanewal', value: 'Khanewal' },
                                     { label: 'Jaranwala', value: 'Jaranwala' },
                                     { label: 'Rawalpindi', value: 'Rawalpindi' },
+                                    {label: 'KPK', value: 'KPK'},
+                                    {label: 'Sindh', value: 'Sindh'},
+                                    
+
                                 ]}
                                 mode="outlined"
                             />
