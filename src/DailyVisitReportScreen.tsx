@@ -20,6 +20,9 @@ const theme = {
   colors: { ...DefaultTheme.colors, primary: "#70ac3b" },
 };
 
+
+
+
 export default function DailyVisitReportScreen() {
   const { token, user } = useAuth();
   const [team, setTeam] = useState<any[]>([]);
@@ -88,6 +91,19 @@ export default function DailyVisitReportScreen() {
       setLoading(false);
     }
   };
+
+
+const formatVisitPurpose = (purpose: string): string => {
+  const purposeMap = {
+    'New': 'Regular Visit',
+    'Old': 'Follow Up Visit',
+    'Mature': 'Mature Order',
+    'NewPotentialCustomer': 'New Customer Visit'
+  };
+
+  // 🔴 'as keyof typeof purposeMap' lagane se indexing error khatam ho jayega
+  return purposeMap[purpose as keyof typeof purposeMap] || purpose || 'Regular Visit';
+};
 
   return (
     <PaperProvider theme={theme}>
@@ -239,7 +255,7 @@ export default function DailyVisitReportScreen() {
                             </View>
                             <View style={{ alignItems: 'flex-end' }}>
                               <Text style={styles.fieldLabel}>PURPOSE</Text>
-                              <Text style={[styles.fieldValue, { color: '#70ac3b' }]}>{act.purpose}</Text>
+                              <Text style={[styles.fieldValue, { color: '#70ac3b' }]}>{formatVisitPurpose(act.purpose)}</Text>
                             </View>
                           </View>
 
